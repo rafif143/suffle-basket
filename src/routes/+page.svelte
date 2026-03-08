@@ -333,6 +333,10 @@
 			<!-- Tabs -->
 			<div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
 				<div class="flex gap-2 w-full md:w-auto">
+ttttt<a href="/schedule" class="flex-1 md:flex-none px-5 py-2.5 bg-neutral-100 border border-neutral-200 hover:border-indigo-500/50 text-indigo-600 font-bold rounded-xl transition-all text-center uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+tttttt<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+ttttttSchedule
+ttttt</a>
 					<a href="/management" class="flex-1 md:flex-none px-5 py-2.5 bg-neutral-100 border border-neutral-200 hover:border-indigo-500/50 text-indigo-600 font-bold rounded-xl transition-all text-center uppercase tracking-widest text-sm flex items-center justify-center gap-2">
 						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
 						Management
@@ -724,9 +728,9 @@
 								{/each}
 							</div>
 
-							<!-- Final & 3rd Place Column -->
-							<div class="flex flex-col justify-around h-full w-64 shrink-0 relative">
-								<div class="absolute -top-4 left-0 text-xs font-black text-indigo-600 tracking-[0.3em] uppercase bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 shadow-sm">Rankings</div>
+							<!-- Grand Final Column -->
+							<div class="flex flex-col justify-center h-full w-64 shrink-0 relative">
+								<div class="absolute -top-4 left-0 text-xs font-black text-indigo-600 tracking-[0.3em] uppercase bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 shadow-sm">Grand Final</div>
 								
 								<!-- Grand Final -->
 								<div class="flex flex-col gap-2">
@@ -740,19 +744,6 @@
 										<div class="text-sm text-indigo-100 pt-2 px-4 flex justify-between italic uppercase font-bold">Winner SF 02</div>
 										<!-- Connection -->
 										<div class="hidden md:block absolute -left-6 top-1/2 w-6 border-t-2 border-dashed border-indigo-300 z-0 pointer-events-none"></div>
-									</div>
-								</div>
-
-								<!-- 3rd Place -->
-								<div class="flex flex-col gap-2">
-									<div class="flex items-center justify-between ml-1 pr-1">
-										<div class="text-xs font-bold text-orange-600 uppercase opacity-40 tracking-widest">3rd Place Match</div>
-										<div class="text-xs font-black text-orange-600/60 uppercase">19.00</div>
-									</div>
-									<div class="bg-white border-2 border-indigo-600 shadow-sm rounded-xl flex flex-col justify-center py-4 relative z-10 transition-all cursor-pointer">
-										<div class="text-xs font-black text-orange-600 text-center mb-3 tracking-[0.3em] uppercase">BRONZE FINAL</div>
-										<div class="text-sm text-neutral-900 border-b border-neutral-50 pb-2 px-4 flex justify-between italic uppercase font-bold">Loser SF 01</div>
-										<div class="text-sm text-neutral-900 pt-2 px-4 flex justify-between italic uppercase font-bold">Loser SF 02</div>
 									</div>
 								</div>
 							</div>
@@ -904,9 +895,9 @@
 						{/each}
 					</div>
 
-					<!-- Final & 3rd Place Column -->
-					<div class="flex flex-col justify-around h-full w-72 shrink-0 relative">
-						<div class="absolute -top-4 left-0 text-xs font-black text-indigo-600 tracking-[0.3em] uppercase bg-indigo-50 px-3 py-1 rounded border border-indigo-100 shadow-sm">Rankings</div>
+					<!-- Grand Final Column -->
+					<div class="flex flex-col justify-center h-full w-72 shrink-0 relative">
+						<div class="absolute -top-4 left-0 text-xs font-black text-indigo-600 tracking-[0.3em] uppercase bg-indigo-50 px-3 py-1 rounded border border-indigo-100 shadow-sm">Grand Final</div>
 						
 						<!-- Grand Final -->
 						<div class="flex flex-col gap-3">
@@ -917,16 +908,6 @@
 								<div class="text-base text-indigo-100 pt-3 px-6 flex justify-between italic uppercase font-bold">Winner SF 02</div>
 								<!-- Connection -->
 								<div class="hidden md:block absolute -left-6 top-1/2 w-6 border-t-[3px] border-dashed border-indigo-300 z-0 pointer-events-none"></div>
-							</div>
-						</div>
-
-						<!-- 3rd Place Match -->
-						<div class="flex flex-col gap-3">
-							<div class="text-xs font-bold text-orange-600 uppercase opacity-30 ml-2 tracking-widest">3rd Place Match</div>
-							<div class="bg-white border-2 border-indigo-600 shadow-sm rounded-2xl flex flex-col justify-center py-6 relative z-10 transition-all cursor-pointer text-center">
-								<div class="text-xs font-black text-orange-600 text-center mb-4 tracking-[0.3em] uppercase">BRONZE FINAL</div>
-								<div class="text-base text-neutral-900 border-b border-neutral-50 pb-3 px-6 flex justify-between italic uppercase font-black">Loser SF 01</div>
-								<div class="text-base text-neutral-900 pt-3 px-6 flex justify-between italic uppercase font-black">Loser SF 02</div>
 							</div>
 						</div>
 					</div>
