@@ -292,174 +292,111 @@
 	}
 </script>
 
-<div class="selection:bg-indigo-500 font-poppins min-h-screen bg-neutral-50 text-neutral-900 selection:text-white">
-	<!-- Navbar -->
-	<header class="sticky top-0 z-50 border-b border-neutral-200 bg-white/80 backdrop-blur-md">
-		<div class="container mx-auto flex flex-col items-center justify-between gap-4 p-4 md:flex-row">
-			<div class="flex items-center space-x-3">
-				<div
-					class="bg-indigo-600 flex h-10 w-10 items-center justify-center rounded-xl shadow-[0_4px_10px_rgba(79,70,229,0.3)]"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="white"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="lucide lucide-dices"
-						><rect width="12" height="12" x="2" y="10" rx="2" ry="2" /><path
-							d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"
-						/><path d="M6 18h.01" /><path d="M10 14h.01" /><path d="M15 6h.01" /><path
-							d="M18 9h.01"
-						/></svg
-					>
-				</div>
-				<div>
-					<h1
-						class="font-poppins font-black text-3xl leading-none tracking-wider text-neutral-900 uppercase md:text-4xl"
-					>
-						Championship <span class="text-indigo-600">Draw</span>
-					</h1>
-					<p class="text-sm font-bold text-neutral-500 uppercase tracking-widest">
-						Tournament Bracket Generator
-					</p>
-				</div>
+<div class="min-h-screen bg-neutral-50">
+	<!-- Header -->
+	<header class="bg-white border-b border-neutral-200 px-8 py-6">
+		<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+			<div>
+				<h1 class="font-montserrat font-black text-3xl text-neutral-900">Championship Draw</h1>
+				<p class="font-poppins text-sm text-neutral-500 mt-1">Generate tournament brackets</p>
 			</div>
-
-			<!-- Tabs -->
-			<div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-				<div class="flex gap-2 w-full md:w-auto">
-ttttt<a href="/schedule" class="flex-1 md:flex-none px-5 py-2.5 bg-neutral-100 border border-neutral-200 hover:border-indigo-500/50 text-indigo-600 font-bold rounded-xl transition-all text-center uppercase tracking-widest text-sm flex items-center justify-center gap-2">
-tttttt<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-ttttttSchedule
-ttttt</a>
-					<a href="/management" class="flex-1 md:flex-none px-5 py-2.5 bg-neutral-100 border border-neutral-200 hover:border-indigo-500/50 text-indigo-600 font-bold rounded-xl transition-all text-center uppercase tracking-widest text-sm flex items-center justify-center gap-2">
-						<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-						Management
-					</a>
-					<a href="/registration" class="flex-1 md:flex-none px-6 py-2.5 bg-indigo-600 border border-indigo-700 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all text-center uppercase tracking-widest text-sm shadow-[0_4px_10px_rgba(79,70,229,0.2)]">
-						Register Team
-					</a>
+			
+			<div class="flex gap-3">
+				<!-- Level Toggle -->
+				<div class="flex gap-2 bg-neutral-100 p-1 rounded-lg">
+					{#each ['SMA', 'SMP'] as lvl}
+						<button
+							class="px-6 py-2 rounded-md font-poppins font-semibold text-sm transition-all {activeLevel === lvl
+								? 'bg-white text-indigo-600 shadow-sm'
+								: 'text-neutral-600 hover:text-neutral-900'}"
+							onclick={() => (activeLevel = lvl)}
+						>
+							{lvl}
+						</button>
+					{/each}
 				</div>
-				
-				<div class="flex gap-3 w-full md:w-auto">
-					<!-- Level Toggle -->
-					<nav class="flex space-x-1 rounded-xl border border-neutral-200 bg-neutral-100 p-1 flex-1 md:flex-none">
-						{#each ['SMA', 'SMP'] as lvl}
-							<button
-								class="flex-1 md:flex-none rounded-lg px-6 py-2 text-base font-bold uppercase transition-all duration-300 {activeLevel === lvl
-									? 'bg-white text-indigo-600 shadow-sm border border-neutral-200'
-									: 'text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900'}"
-								onclick={() => (activeLevel = lvl)}
-							>
-								{lvl}
-							</button>
-						{/each}
-					</nav>
 
-					<!-- Gender Toggle -->
-					<nav class="flex space-x-1 rounded-xl border border-neutral-200 bg-neutral-100 p-1 flex-1 md:flex-none">
-						{#each ['Putra', 'Putri'] as gen}
-							<button
-								class="flex-1 md:flex-none rounded-lg px-6 py-2 text-base font-bold uppercase transition-all duration-300 {activeGender === gen
-									? 'bg-white text-indigo-600 shadow-sm border border-neutral-200'
-									: 'text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900'}"
-								onclick={() => (activeGender = gen)}
-							>
-								{gen}
-							</button>
-						{/each}
-					</nav>
+				<!-- Gender Toggle -->
+				<div class="flex gap-2 bg-neutral-100 p-1 rounded-lg">
+					{#each ['Putra', 'Putri'] as gen}
+						<button
+							class="px-6 py-2 rounded-md font-poppins font-semibold text-sm transition-all {activeGender === gen
+								? 'bg-white text-indigo-600 shadow-sm'
+								: 'text-neutral-600 hover:text-neutral-900'}"
+							onclick={() => (activeGender = gen)}
+						>
+							{gen}
+						</button>
+					{/each}
 				</div>
 			</div>
 		</div>
 	</header>
 
-	<main class="container mx-auto p-4 md:p-6 lg:p-8">
+	<main class="p-8">
 		<!-- Main Content Grid -->
-		<div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+		<div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
 			<!-- Left side: Entry -->
-			<div class="col-span-1 space-y-4 lg:col-span-4">
-				<div
-					class="group relative h-full overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl backdrop-blur-xl"
-				>
-					<h2
-						class="relative z-10 mb-2 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xl font-bold tracking-widest text-neutral-900 uppercase"
-					>
-						<div class="flex items-center gap-3">
-							<span class="font-poppins font-black">Participants</span>
-							<span
-								class="text-indigo-600 border-indigo-200 rounded border bg-indigo-50 px-2 py-1 text-xs font-bold shadow-sm"
-								>16 Teams</span
-							>
+			<div class="col-span-1 lg:col-span-4">
+				<div class="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm h-full">
+					<div class="flex items-center justify-between mb-4">
+						<div>
+							<h2 class="font-montserrat font-bold text-xl text-neutral-900">Participants</h2>
+							<p class="font-poppins text-xs text-neutral-500 mt-1">
+								{activeLevel} {activeGender} Teams
+							</p>
 						</div>
 						<button 
 							onclick={loadDummy}
-							class="text-[10px] uppercase font-bold px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 rounded border border-neutral-200 transition-colors flex items-center justify-center gap-2 tracking-wider"
+							class="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 rounded-lg text-xs font-poppins font-medium transition-colors"
 						>
-							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-							Load Dummies
+							Load Dummy
 						</button>
-					</h2>
-					<p class="relative z-10 mb-4 text-xs font-medium leading-relaxed text-neutral-500 uppercase tracking-widest">
-						Enter the 16 teams participating in <strong class="text-neutral-900"
-							>{activeLevel} {activeGender}</strong
-						>.
-					</p>
+					</div>
+					<form onsubmit={addTeam} class="mb-4 flex gap-2">
+						<input
+							type="text"
+							bind:value={newTeamName}
+							disabled={teamsInput.length >= 16}
+							class="flex-1 px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg font-poppins text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50"
+							placeholder="Enter team name..."
+						/>
+						<button
+							type="submit"
+							disabled={teamsInput.length >= 16 || newTeamName.trim() === ''}
+							class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-poppins font-semibold text-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							Add
+						</button>
+					</form>
 
-					<div class="relative z-10">
-						<form onsubmit={addTeam} class="mb-4 flex gap-2">
-							<input
-								type="text"
-								bind:value={newTeamName}
-								disabled={teamsInput.length >= 16}
-								class="focus:ring-indigo-500/50 focus:border-indigo-500 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-base font-bold text-neutral-900 shadow-sm transition-all placeholder:text-neutral-400 focus:outline-none focus:ring-2 disabled:opacity-50"
-								placeholder="Enter team name..."
-							/>
-							<button
-								type="submit"
-								disabled={teamsInput.length >= 16 || newTeamName.trim() === ''}
-								class="bg-indigo-600 rounded-xl px-6 py-3 font-black text-white text-sm uppercase tracking-widest transition-all hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-							>
-								ADD
-							</button>
-						</form>
-
-						<div class="scrollbar-thin scrollbar-thumb-neutral-200 h-[520px] space-y-2 overflow-y-auto pr-2 pb-10">
-							<div class="mb-2 text-right">
-								<span class="{teamsInput.length === 16 ? 'text-indigo-600 font-bold' : 'text-neutral-400'} text-sm font-bold uppercase tracking-widest">{teamsInput.length}/16 Teams Added</span>
-							</div>
-							{#each teamsInput as team, i}
-								{@const isScheduled = drawResults.some(m => m.team1 === team || m.team2 === team)}
-								<div class="flex items-center justify-between rounded-lg border {isScheduled ? 'border-indigo-100 bg-indigo-50/50' : 'border-neutral-100 bg-neutral-50'} p-3 transition-colors hover:border-neutral-200">
-									<div class="flex items-center gap-3 overflow-hidden">
-										<span class="font-poppins font-black text-neutral-400 text-lg">{i + 1}</span>
-										<div class="flex flex-col">
-											<span class="font-bold text-neutral-900 text-base leading-tight">{team}</span>
-											{#if isScheduled}
-												<span class="text-xs font-black text-indigo-600 uppercase tracking-widest mt-0.5 flex items-center gap-1">
-													<span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
-													Scheduled
-												</span>
-											{:else}
-												<span class="text-xs font-bold text-neutral-400 uppercase tracking-widest mt-0.5">Not Scheduled</span>
-											{/if}
-										</div>
-									</div>
-									<button
-										onclick={() => removeTeam(i)}
-										class="text-neutral-300 transition-colors hover:text-red-500 shrink-0"
-										aria-label="Remove Team"
-									>
-										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-									</button>
-								</div>
-							{/each}
+					<div class="space-y-2 max-h-[520px] overflow-y-auto pr-2">
+						<div class="mb-2 text-right">
+							<span class="text-xs font-poppins font-medium {teamsInput.length === 16 ? 'text-indigo-600' : 'text-neutral-400'}">{teamsInput.length}/16 Teams</span>
 						</div>
+						{#each teamsInput as team, i}
+							{@const isScheduled = drawResults.some(m => m.team1 === team || m.team2 === team)}
+							<div class="flex items-center justify-between p-3 rounded-lg border {isScheduled ? 'border-indigo-100 bg-indigo-50/50' : 'border-neutral-100 bg-neutral-50'} hover:border-neutral-200 transition-colors">
+								<div class="flex items-center gap-3 overflow-hidden">
+									<span class="font-montserrat font-bold text-neutral-400 text-sm">{i + 1}</span>
+									<div class="flex flex-col">
+										<span class="font-poppins font-medium text-neutral-900 text-sm">{team}</span>
+										{#if isScheduled}
+											<span class="text-xs font-poppins text-indigo-600 flex items-center gap-1">
+												<span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+												Scheduled
+											</span>
+										{/if}
+									</div>
+								</div>
+								<button
+									onclick={() => removeTeam(i)}
+									class="text-neutral-300 hover:text-red-500 transition-colors"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+								</button>
+							</div>
+						{/each}
 					</div>
 				</div>
 			</div>
