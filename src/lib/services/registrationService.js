@@ -19,7 +19,7 @@ export const registrationService = {
 	 * Get registration by ID
 	 */
 	async getById(id) {
-		const response = await apiClient.get(`/registrations/${id}`);
+		const response = await apiClient.get(`/registrations?id=${id}`);
 		return response.data;
 	},
 
@@ -73,7 +73,7 @@ export const registrationService = {
 	 * Update registration status
 	 */
 	async updateStatus(id, status) {
-		const response = await apiClient.patch(`/registrations/${id}`, { status });
+		const response = await apiClient.patch(`/registrations?id=${id}`, { status });
 		return response.data;
 	},
 
@@ -81,14 +81,14 @@ export const registrationService = {
 	 * Delete registration
 	 */
 	async delete(id) {
-		await apiClient.delete(`/registrations/${id}`);
+		await apiClient.delete(`/registrations?id=${id}`);
 	},
 
 	/**
 	 * Get statistics
 	 */
 	async getStats() {
-		const response = await apiClient.get('/registrations/stats');
+		const response = await apiClient.get('/registrations?stats=true');
 		return response.data;
 	}
 };

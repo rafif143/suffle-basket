@@ -83,8 +83,8 @@ export const apiClient = {
         apiCache.delete(`GET:/draw/${category}/results`);
       });
     }
-    if (endpoint.includes('/schedule/scores')) {
-      apiCache.delete('GET:/schedule/scores');
+    if (endpoint.includes('/schedule')) {
+      apiCache.delete('GET:/schedule?scores=true');
     }
     if (endpoint.includes('/matches')) {
       apiCache.delete('GET:/matches');

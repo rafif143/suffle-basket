@@ -34,14 +34,13 @@ export function requireAuth(req, res) {
 export function isPublicEndpoint(req) {
   const publicEndpoints = [
     '/api/health',
-    '/api/auth/login',
-    '/api/auth/verify',
-    '/api/schedule/scores', // Live scores - public
+    '/api/auth',
+    '/api/schedule', // Live scores - public
     '/api/live-scores'      // Dedicated public endpoint
   ];
 
-  // Allow GET requests to schedule scores (read-only)
-  if (req.url === '/api/schedule/scores' && req.method === 'GET') {
+  // Allow GET requests to schedule (read-only)
+  if (req.url.startsWith('/api/schedule') && req.method === 'GET') {
     return true;
   }
 

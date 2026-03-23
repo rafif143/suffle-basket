@@ -39,7 +39,7 @@ export const matchService = {
    * Get single match by ID
    */
   async getMatch(id) {
-    const response = await apiClient.get(`/matches/${id}`);
+    const response = await apiClient.get(`/matches?id=${id}`);
     return response.data;
   },
 
@@ -55,7 +55,7 @@ export const matchService = {
    * Update match
    */
   async updateMatch(id, updates) {
-    const response = await apiClient.patch(`/matches/${id}`, updates);
+    const response = await apiClient.patch(`/matches?id=${id}`, updates);
     return response.data;
   },
 
@@ -77,7 +77,7 @@ export const matchService = {
    * Delete match
    */
   async deleteMatch(id) {
-    const response = await apiClient.delete(`/matches/${id}`);
+    const response = await apiClient.delete(`/matches?id=${id}`);
     return response.data;
   },
 

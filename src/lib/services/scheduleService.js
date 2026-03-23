@@ -12,7 +12,7 @@ export const scheduleService = {
 	 * Get match scores
 	 */
 	async getScores() {
-		const response = await apiClient.get('/schedule/scores');
+		const response = await apiClient.get('/schedule?scores=true');
 		this.cachedScores = response.data;
 		return response.data;
 	},
@@ -21,7 +21,7 @@ export const scheduleService = {
 	 * Save match score
 	 */
 	async saveScore(matchKey, score1, score2) {
-		await apiClient.post('/schedule/scores', {
+		await apiClient.post('/schedule', {
 			matchKey,
 			score1: parseInt(score1),
 			score2: parseInt(score2)

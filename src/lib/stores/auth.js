@@ -13,7 +13,7 @@ function createAuthStore() {
 		subscribe,
 		login: async (username, password) => {
 			try {
-				const response = await fetch('/api/auth/login', {
+				const response = await fetch('/api/auth?action=login', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ username, password })
@@ -63,7 +63,7 @@ function createAuthStore() {
 		},
 		register: async (userData) => {
 			try {
-				const response = await fetch('/api/auth/register', {
+				const response = await fetch('/api/auth?action=register', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(userData)
@@ -98,7 +98,7 @@ function createAuthStore() {
 			}
 
 			try {
-				const response = await fetch('/api/auth/login', {
+				const response = await fetch('/api/auth', {
 					headers: { 'Authorization': `Bearer ${token}` }
 				});
 
