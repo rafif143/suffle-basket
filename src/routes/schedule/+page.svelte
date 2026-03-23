@@ -20,9 +20,13 @@
 	let matchScores = $state({});
 
 	// Load data on mount
-	onMount(() => {
+	onMount(async () => {
 		scheduleData = generateScheduleData();
-		matchScores = scheduleService.getScores();
+		try {
+			matchScores = await scheduleService.getScores();
+		} catch (error) {
+			console.error('Failed to load scores:', error);
+		}
 	});
 
 	// Computed values
@@ -77,15 +81,17 @@
 		scoreModal.score2 = '';
 	}
 
-	function saveScore() {
+	async function saveScore() {
 		if (!scoreModal.match) return;
-		const scoreKey = `${scoreModal.match.day}-${scoreModal.match.matchStrId}-${scoreModal.match.category}`;
-		scheduleService.saveScore(scoreKey, { 
-			score1: scoreModal.score1, 
-			score2: scoreModal.score2 
-		});
-		matchScores = scheduleService.getScores();
-		closeScoreModal();
+		try {
+			const scoreKey = `${scoreModal.match.day}-${scoreModal.match.matchStrId}-${scoreModal.match.category}`;
+			await scheduleService.saveScore(scoreKey, scoreModal.score1, scoreModal.score2);
+			matchScores = await scheduleService.getScores();
+			closeScoreModal();
+		} catch (error) {
+			console.error('Failed to save score:', error);
+			alert('Failed to save score. Please try again.');
+		}
 	}
 
 	// Helper functions

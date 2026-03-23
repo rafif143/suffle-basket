@@ -1,12 +1,44 @@
 <script>
+	import { onMount } from 'svelte';
+	import { registrationService } from '$lib/services';
 	import { StatsCard, TeamDetailModal } from '$lib/components/features/ManagementPage';
 
 	let registrations = $state([]);
+	let loading = $state(true);
 
 	let searchQuery = $state('');
 	let filterLevel = $state('All');
 	let filterStatus = $state('All');
 	let selectedTeam = $state(null);
+
+	onMount(async () => {
+		await loadData();
+	});
+
+	async function loadData() {
+		try {
+			loading = true;
+			const data = await registrationService.getAll();
+			// Transform API data to match component format
+			registrations = data.map(r => ({
+				id: r.id,
+				school: r.school_name,
+				level: r.level,
+				gender: r.gender,
+				status: r.status,
+				logo: r.logo_url,
+				address: r.school_address,
+				whatsapp: r.whatsapp,
+				players: r.players,
+				officials: r.officials,
+				timestamp: r.created_at
+			}));
+		} catch (error) {
+			console.error('Failed to load registrations:', error);
+		} finally {
+			loading = false;
+		}
+	}
 
 	let filteredTeams = $derived(
 		registrations.filter(t => {
@@ -24,10 +56,17 @@
 		rejected: registrations.filter(r => r.status === 'Rejected').length
 	});
 
-	function updateStatus(id, newStatus) {
-		registrations = registrations.map(r => r.id === id ? { ...r, status: newStatus } : r);
-		if (selectedTeam && selectedTeam.id === id) {
-			selectedTeam = { ...selectedTeam, status: newStatus };
+	async function updateStatus(id, newStatus) {
+		try {
+			await registrationService.updateStatus(id, newStatus);
+			// Update local state
+			registrations = registrations.map(r => r.id === id ? { ...r, status: newStatus } : r);
+			if (selectedTeam && selectedTeam.id === id) {
+				selectedTeam = { ...selectedTeam, status: newStatus };
+			}
+		} catch (error) {
+			console.error('Failed to update status:', error);
+			alert('Failed to update status. Please try again.');
 		}
 	}
 

@@ -1,26 +1,31 @@
 /**
  * Schedule Service
- * Handles all schedule-related operations
- * Ready to be replaced with API calls
+ * Handles all schedule-related operations via API
  */
 
-import { storage } from '$lib/utils/storage.js';
+import { apiClient } from '$lib/api/client.js';
 
 export const scheduleService = {
+	cachedScores: {},
+
 	/**
 	 * Get match scores
 	 */
-	getScores() {
-		return storage.get('match_scores') || {};
+	async getScores() {
+		const response = await apiClient.get('/schedule/scores');
+		this.cachedScores = response.data;
+		return response.data;
 	},
 
 	/**
 	 * Save match score
 	 */
-	saveScore(matchKey, score) {
-		const scores = this.getScores();
-		scores[matchKey] = score;
-		storage.set('match_scores', scores);
+	async saveScore(matchKey, score1, score2) {
+		await apiClient.post('/schedule/scores', {
+			matchKey,
+			score1: parseInt(score1),
+			score2: parseInt(score2)
+		});
 	},
 
 	/**
@@ -28,8 +33,7 @@ export const scheduleService = {
 	 */
 	getMatchScore(match) {
 		const scoreKey = `${match.day}-${match.matchStrId}-${match.category}`;
-		const scores = this.getScores();
-		return scores[scoreKey];
+		return this.cachedScores[scoreKey];
 	},
 
 	/**

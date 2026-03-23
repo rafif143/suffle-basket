@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { storage } from '$lib/utils/storage.js';
+	import { settingsService } from '$lib/services';
 	import { NotificationModal } from '$lib/components/ui';
 
 	let bankName = $state('');
@@ -16,30 +16,40 @@
 		type: 'success'
 	});
 
-	onMount(() => {
-		loadSettings();
+	onMount(async () => {
+		await loadSettings();
 	});
 
-	function loadSettings() {
-		const settings = storage.get('tournament_settings') || {};
-		bankName = settings.bankName || 'Bank BCA';
-		accountNumber = settings.accountNumber || '123 456 7890';
-		accountName = settings.accountName || 'Panitia Championship';
-		registrationFee = settings.registrationFee || '350000';
-		whatsappNumber = settings.whatsappNumber || '81234567890';
+	async function loadSettings() {
+		try {
+			const data = await settingsService.getSettings();
+			if (data) {
+				bankName = data.bank_name || 'Bank BCA';
+				accountNumber = data.account_number || '123 456 7890';
+				accountName = data.account_name || 'Panitia Championship';
+				registrationFee = data.registration_fee || '350000';
+				whatsappNumber = data.whatsapp_contact || '81234567890';
+			}
+		} catch (error) {
+			console.error('Failed to load settings:', error);
+		}
 	}
 
-	function handleSave(e) {
+	async function handleSave(e) {
 		e.preventDefault();
-		const settings = {
-			bankName,
-			accountNumber,
-			accountName,
-			registrationFee,
-			whatsappNumber
-		};
-		storage.set('tournament_settings', settings);
-		saveModal.isOpen = true;
+		try {
+			await settingsService.saveSettings({
+				bankName,
+				accountNumber,
+				accountName,
+				registrationFee,
+				whatsappContact: whatsappNumber
+			});
+			saveModal.isOpen = true;
+		} catch (error) {
+			console.error('Failed to save settings:', error);
+			alert('Failed to save settings. Please try again.');
+		}
 	}
 
 	function formatCurrency(value) {

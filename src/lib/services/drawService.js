@@ -1,49 +1,46 @@
 /**
  * Draw Service
- * Handles all draw-related operations
- * Ready to be replaced with API calls
+ * Handles all draw-related operations via API
  */
 
-import { storage } from '$lib/utils/storage.js';
+import { apiClient } from '$lib/api/client.js';
 
 export const drawService = {
 	/**
 	 * Get teams for a specific category
 	 */
-	getTeams(category) {
-		return storage.get(`teams_${category}`) || [];
+	async getTeams(category) {
+		const response = await apiClient.get(`/draw/${category}/teams`);
+		return response.data;
 	},
 
 	/**
 	 * Save teams for a specific category
 	 */
-	saveTeams(category, teams) {
-		storage.set(`teams_${category}`, teams);
+	async saveTeams(category, teams) {
+		await apiClient.post(`/draw/${category}/teams`, { teams });
 	},
 
 	/**
 	 * Get draw results for a specific category
 	 */
-	getResults(category) {
-		const saved = storage.get(`results_${category}`);
-		if (saved) return saved;
-		
-		// Default empty results
-		return Array(8).fill(null).map(() => ({ team1: '?', team2: '?' }));
+	async getResults(category) {
+		const response = await apiClient.get(`/draw/${category}/results`);
+		return response.data;
 	},
 
 	/**
 	 * Save draw results for a specific category
 	 */
-	saveResults(category, results) {
-		storage.set(`results_${category}`, results);
+	async saveResults(category, results) {
+		await apiClient.post(`/draw/${category}/results`, { results });
 	},
 
 	/**
 	 * Reset draw for a specific category
 	 */
-	resetDraw(category) {
-		const emptyResults = Array(8).fill(null).map(() => ({ team1: '?', team2: '?' }));
-		storage.set(`results_${category}`, emptyResults);
+	async resetDraw(category) {
+		// Delete results by saving empty array
+		await apiClient.post(`/draw/${category}/results`, { results: [] });
 	}
 };

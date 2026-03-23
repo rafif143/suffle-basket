@@ -23,11 +23,16 @@
 		isOpen: false,
 		title: 'Reset Draw',
 		message: 'Are you sure you want to reset all draw results for this category?',
-		onConfirm: () => {
-			const category = `${activeLevel.toLowerCase()}-${activeGender.toLowerCase()}`;
-			drawService.resetDraw(category);
-			loadData();
-			resetModal.isOpen = false;
+		onConfirm: async () => {
+			try {
+				const category = `${activeLevel.toLowerCase()}-${activeGender.toLowerCase()}`;
+				await drawService.resetDraw(category);
+				await loadData();
+				resetModal.isOpen = false;
+			} catch (error) {
+				console.error('Failed to reset draw:', error);
+				alert('Failed to reset draw. Please try again.');
+			}
 		}
 	});
 
@@ -50,10 +55,14 @@
 		loadData();
 	});
 
-	function loadData() {
-		const category = `${activeLevel.toLowerCase()}-${activeGender.toLowerCase()}`;
-		teamsInput = drawService.getTeams(category);
-		drawResults = drawService.getResults(category);
+	async function loadData() {
+		try {
+			const category = `${activeLevel.toLowerCase()}-${activeGender.toLowerCase()}`;
+			teamsInput = await drawService.getTeams(category);
+			drawResults = await drawService.getResults(category);
+		} catch (error) {
+			console.error('Failed to load draw data:', error);
+		}
 	}
 
 	function handleShuffle() {
@@ -77,7 +86,7 @@
 		let counter = 0;
 		const duration = 2500;
 		const interval = 80;
-		const timer = setInterval(() => {
+		const timer = setInterval(async () => {
 			counter += interval;
 			shuffleTeam1 = remainingTeams[Math.floor(Math.random() * remainingTeams.length)];
 			shuffleTeam2 = remainingTeams[Math.floor(Math.random() * remainingTeams.length)];
@@ -89,7 +98,11 @@
 				drawResults[shuffleMatchIndex] = { team1: shuffleTeam1, team2: shuffleTeam2 };
 				drawResults = [...drawResults];
 				const category = `${activeLevel.toLowerCase()}-${activeGender.toLowerCase()}`;
-				drawService.saveResults(category, drawResults);
+				try {
+					await drawService.saveResults(category, drawResults);
+				} catch (error) {
+					console.error('Failed to save draw results:', error);
+				}
 				isShuffling = false;
 			}
 		}, interval);

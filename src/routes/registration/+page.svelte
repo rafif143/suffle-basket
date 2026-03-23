@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { storage } from '$lib/utils/storage.js';
+	import { settingsService, registrationService } from '$lib/services';
 	import { NotificationModal } from '$lib/components/ui';
 	import { PlayerRow } from '$lib/components/features/RegistrationPage';
 
@@ -21,12 +21,13 @@
 	let officials = $state(['', '']);
 	let submissionStatus = $state(null);
 
-	// Settings from storage
+	// Settings from API
 	let settings = $state({
 		bankName: 'Bank BCA',
 		accountNumber: '123 456 7890',
 		accountName: 'Panitia Championship',
-		registrationFee: '350000'
+		registrationFee: '350000',
+		whatsappContact: ''
 	});
 
 	let errorModal = $state({
@@ -35,10 +36,20 @@
 		message: ''
 	});
 
-	onMount(() => {
-		const savedSettings = storage.get('tournament_settings');
-		if (savedSettings) {
-			settings = savedSettings;
+	onMount(async () => {
+		try {
+			const data = await settingsService.getSettings();
+			if (data) {
+				settings = {
+					bankName: data.bank_name,
+					accountNumber: data.account_number,
+					accountName: data.account_name,
+					registrationFee: data.registration_fee,
+					whatsappContact: data.whatsapp_contact || ''
+				};
+			}
+		} catch (error) {
+			console.error('Failed to load settings:', error);
 		}
 	});
 
@@ -82,10 +93,49 @@
 		schoolLogo = null;
 	}
 
-	function handleSubmit(e) {
+	async function handleSubmit(e) {
 		e.preventDefault();
 		submissionStatus = 'submitting';
-		setTimeout(() => { submissionStatus = 'success'; }, 2000);
+		
+		try {
+			const registrationData = {
+				schoolName,
+				schoolAddress,
+				whatsapp,
+				level,
+				gender,
+				players: players.map(p => ({ name: p.name })),
+				officials
+			};
+
+			await registrationService.save(registrationData);
+			submissionStatus = 'success';
+			
+			// Reset form after 2 seconds
+			setTimeout(() => {
+				schoolName = '';
+				schoolAddress = '';
+				whatsapp = '';
+				level = 'SMA';
+				gender = 'Putra';
+				schoolLogo = null;
+				players = [
+					{ name: '', card: null },
+					{ name: '', card: null },
+					{ name: '', card: null },
+					{ name: '', card: null },
+					{ name: '', card: null }
+				];
+				officials = ['', ''];
+				submissionStatus = null;
+			}, 2000);
+		} catch (error) {
+			console.error('Registration failed:', error);
+			submissionStatus = 'error';
+			errorModal.title = 'Registration Failed';
+			errorModal.message = error.message || 'Failed to submit registration. Please try again.';
+			errorModal.isOpen = true;
+		}
 	}
 
 	let filledPlayers = $derived(players.filter(p => p.name.trim()).length);

@@ -1,74 +1,63 @@
 /**
  * Registration Service
- * Handles team registration data management
- * Ready to be replaced with API calls
+ * Handles team registration data management via API
  */
 
-import { storage } from '$lib/utils/storage.js';
+import { apiClient } from '$lib/api/client.js';
 
 export const registrationService = {
 	/**
 	 * Get all registrations
 	 */
-	getAll() {
-		return storage.get('registrations') || [];
+	async getAll() {
+		const response = await apiClient.get('/registrations');
+		return response.data;
 	},
 
 	/**
 	 * Get registration by ID
 	 */
-	getById(id) {
-		const registrations = this.getAll();
-		return registrations.find(r => r.id === id);
+	async getById(id) {
+		const response = await apiClient.get(`/registrations/${id}`);
+		return response.data;
 	},
 
 	/**
 	 * Save new registration
 	 */
-	save(registration) {
-		const registrations = this.getAll();
-		const newRegistration = {
-			...registration,
-			id: `REG-${String(registrations.length + 1).padStart(3, '0')}`,
-			timestamp: new Date().toISOString(),
-			status: 'Pending'
-		};
-		registrations.push(newRegistration);
-		storage.set('registrations', registrations);
-		return newRegistration;
+	async save(registration) {
+		const response = await apiClient.post('/registrations', {
+			schoolName: registration.schoolName,
+			schoolAddress: registration.schoolAddress,
+			whatsapp: registration.whatsapp,
+			level: registration.level,
+			gender: registration.gender,
+			players: registration.players,
+			officials: registration.officials
+		});
+		return response.data;
 	},
 
 	/**
 	 * Update registration status
 	 */
-	updateStatus(id, status) {
-		const registrations = this.getAll();
-		const updated = registrations.map(r => 
-			r.id === id ? { ...r, status } : r
-		);
-		storage.set('registrations', updated);
-		return updated.find(r => r.id === id);
+	async updateStatus(id, status) {
+		const response = await apiClient.patch(`/registrations/${id}`, { status });
+		return response.data;
 	},
 
 	/**
 	 * Delete registration
 	 */
-	delete(id) {
-		const registrations = this.getAll();
-		const filtered = registrations.filter(r => r.id !== id);
-		storage.set('registrations', filtered);
+	async delete(id) {
+		await apiClient.delete(`/registrations/${id}`);
 	},
 
 	/**
 	 * Get statistics
 	 */
-	getStats() {
-		const registrations = this.getAll();
-		return {
-			total: registrations.length,
-			pending: registrations.filter(r => r.status === 'Pending').length,
-			verified: registrations.filter(r => r.status === 'Verified').length,
-			rejected: registrations.filter(r => r.status === 'Rejected').length
-		};
+	async getStats() {
+		const response = await apiClient.get('/registrations/stats');
+		return response.data;
 	}
 };
