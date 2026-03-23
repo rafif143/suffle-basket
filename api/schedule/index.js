@@ -4,12 +4,73 @@ import { cors } from '../_lib/cors.js';
 /**
  * Schedule API
  * GET /api/schedule - Get all schedule data from draw_results
+ * GET /api/schedule?scores=true - Get all scores
+ * GET /api/schedule?matchKey=xxx - Get specific score
+ * POST /api/schedule - Save score (PROTECTED)
+ * DELETE /api/schedule?matchKey=xxx - Delete score (PROTECTED)
  */
 export default async function handler(req, res) {
   if (cors(req, res)) return;
 
+  const { scores, matchKey } = req.query;
+
+  // Check authentication for non-GET requests
+  if (req.method !== 'GET') {
+    const { requireAuth } = await import('../_lib/auth.js');
+    const user = requireAuth(req, res);
+    if (!user) return;
+  }
+
   try {
     if (req.method === 'GET') {
+      // Get all scores
+      if (scores === 'true') {
+        const { data, error } = await supabase
+          .from('match_scores')
+          .select('*');
+
+        if (error) throw error;
+
+        // Convert to object format
+        const scoresObject = {};
+        data.forEach(score => {
+          scoresObject[score.match_key] = {
+            score1: score.score1,
+            score2: score.score2
+          };
+        });
+
+        return res.status(200).json({
+          success: true,
+          data: scoresObject
+        });
+      }
+
+      // Get specific match score
+      if (matchKey) {
+        const { data, error } = await supabase
+          .from('match_scores')
+          .select('*')
+          .eq('match_key', matchKey)
+          .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+
+        if (!data) {
+          return res.status(404).json({
+            success: false,
+            message: 'Score not found'
+          });
+        }
+
+        return res.status(200).json({
+          success: true,
+          data: {
+            score1: data.score1,
+            score2: data.score2
+          }
+        });
+      }
       // Get all draw results
       const { data: drawResults, error } = await supabase
         .from('draw_results')
@@ -69,6 +130,48 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         data: scheduleData
+      });
+    }
+
+    if (req.method === 'POST') {
+      const { matchKey: bodyMatchKey, score1, score2 } = req.body;
+
+      const { data, error } = await supabase
+        .from('match_scores')
+        .upsert({
+          match_key: bodyMatchKey,
+          score1: parseInt(score1),
+          score2: parseInt(score2),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'match_key'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return res.status(200).json({
+        success: true,
+        message: 'Score saved successfully',
+        data: {
+          score1: data.score1,
+          score2: data.score2
+        }
+      });
+    }
+
+    if (req.method === 'DELETE') {
+      const { error } = await supabase
+        .from('match_scores')
+        .delete()
+        .eq('match_key', matchKey);
+
+      if (error) throw error;
+
+      return res.status(200).json({
+        success: true,
+        message: 'Score deleted successfully'
       });
     }
 

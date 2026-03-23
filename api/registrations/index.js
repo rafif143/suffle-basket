@@ -5,10 +5,16 @@ import { requireAuth, isPublicEndpoint } from '../_lib/auth.js';
 /**
  * Registrations endpoint
  * GET /api/registrations - Get all (PROTECTED)
+ * GET /api/registrations?id=X - Get by ID
+ * GET /api/registrations?stats=true - Get stats
  * POST /api/registrations - Create new (PROTECTED)
+ * PATCH /api/registrations?id=X - Update status
+ * DELETE /api/registrations?id=X - Delete
  */
 export default async function handler(req, res) {
   if (cors(req, res)) return;
+
+  const { id, stats } = req.query;
 
   // Check if authentication is required
   if (!isPublicEndpoint(req)) {
@@ -18,6 +24,50 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
+      // Get stats
+      if (stats === 'true') {
+        const { data, error } = await supabase
+          .from('registrations')
+          .select('status');
+
+        if (error) throw error;
+
+        const statsData = {
+          total: data.length,
+          pending: data.filter(r => r.status === 'Pending').length,
+          verified: data.filter(r => r.status === 'Verified').length,
+          rejected: data.filter(r => r.status === 'Rejected').length
+        };
+
+        return res.status(200).json({
+          success: true,
+          data: statsData
+        });
+      }
+
+      // Get by ID
+      if (id) {
+        const { data, error } = await supabase
+          .from('registrations')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) throw error;
+
+        if (!data) {
+          return res.status(404).json({
+            success: false,
+            message: 'Registration not found'
+          });
+        }
+
+        return res.status(200).json({
+          success: true,
+          data
+        });
+      }
+
       // Get all registrations
       const { data, error } = await supabase
         .from('registrations')
@@ -141,6 +191,53 @@ export default async function handler(req, res) {
         success: true,
         message: 'Registration created successfully',
         data
+      });
+    }
+
+    if (req.method === 'PATCH') {
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID is required'
+        });
+      }
+
+      const { status } = req.body;
+
+      const { data, error } = await supabase
+        .from('registrations')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return res.status(200).json({
+        success: true,
+        message: 'Status updated successfully',
+        data
+      });
+    }
+
+    if (req.method === 'DELETE') {
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID is required'
+        });
+      }
+
+      const { error } = await supabase
+        .from('registrations')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      return res.status(200).json({
+        success: true,
+        message: 'Registration deleted successfully'
       });
     }
 
