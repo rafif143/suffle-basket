@@ -193,9 +193,14 @@
 
 				<!-- View Toggle -->
 				<div class="flex items-center justify-between">
-					<h3 class="font-montserrat text-lg font-extrabold text-neutral-900">
-						{showBracket ? 'Tournament Bracket' : 'Draw Results'}
-					</h3>
+					<div class="flex items-center gap-4">
+						<h3 class="font-montserrat text-lg font-extrabold text-neutral-900">
+							{showBracket ? 'Tournament Bracket' : 'Draw Results'}
+						</h3>
+						<span class="text-sm font-poppins font-medium text-neutral-600">
+							- {activeLevel} {activeGender}
+						</span>
+					</div>
 					<div class="flex bg-neutral-100 rounded-xl p-0.5 gap-0.5">
 						<button 
 							class="px-4 py-2 rounded-lg font-poppins text-sm font-semibold transition-all {!showBracket ? 'bg-white text-indigo-600 shadow-sm' : 'text-neutral-500'}"

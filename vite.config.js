@@ -5,6 +5,10 @@ import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
+	optimizeDeps: {
+		include: ['gracket'],
+		exclude: ['gracket/svelte']
+	},
 	server: {
 		proxy: {
 			'/api': {

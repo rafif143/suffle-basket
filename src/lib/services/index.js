@@ -5,3 +5,4 @@ export * from './registrationService.js';
 export * from './settingsService.js';
 export * from './scheduleGenerator.js';
 export * from './pdfService.js';
+export * from './matchService.js';

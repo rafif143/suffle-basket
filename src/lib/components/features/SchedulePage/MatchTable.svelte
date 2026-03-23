@@ -10,7 +10,7 @@
 <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-neutral-200/50 shadow-sm overflow-hidden">
 	<div class="overflow-x-auto">
 		<table class="w-full">
-			<thead class="bg-gradient-to-r from-indigo-50 to-white border-b border-neutral-200">
+			<thead class="bg-linear-to-r from-indigo-50 to-white border-b border-neutral-200">
 				<tr>
 					<th class="px-4 py-3 text-left text-xs font-montserrat font-bold text-neutral-700 uppercase">Match</th>
 					<th class="px-4 py-3 text-left text-xs font-montserrat font-bold text-neutral-700 uppercase">Time</th>
@@ -28,13 +28,13 @@
 					{@const matchScore = getMatchScore(match)}
 					<tr class="hover:bg-neutral-50/50 transition-colors {matchComplete ? 'bg-green-50/30' : ''}">
 						<td class="px-4 py-4">
-							<span class="font-montserrat font-bold text-sm text-indigo-600">{match.round === 'Grand Final' ? `Final ${match.category}` : match.matchStrId}</span>
+							<span class="font-montserrat font-bold text-sm text-indigo-600">{match.round === 'Final' ? `Final ${match.category}` : `M${String(match.match_number).padStart(2, '0')}`}</span>
 						</td>
 						<td class="px-4 py-4">
-							<span class="text-sm font-poppins text-neutral-700">{match.time}</span>
+							<span class="text-sm font-poppins text-neutral-700">{match.match_time}</span>
 						</td>
 						<td class="px-4 py-4">
-							<span class="text-xs font-poppins font-semibold px-2 py-1 rounded {match.level === 'SMA' ? 'bg-blue-600 text-white' : 'bg-orange-500 text-white'}">{match.category}</span>
+							<span class="text-xs font-poppins font-semibold px-2 py-1 rounded {match.category.includes('SMA') ? 'bg-blue-600 text-white' : 'bg-orange-500 text-white'}">{match.category}</span>
 						</td>
 						<td class="px-4 py-4">
 							<div class="flex items-center gap-2">
@@ -66,7 +66,7 @@
 									Complete
 								</span>
 							{:else}
-								<span class="text-neutral-400 text-xs font-poppins">Pending</span>
+								<span class="text-neutral-400 text-xs font-poppins">Not Play Yet</span>
 							{/if}
 						</td>
 						<td class="px-4 py-4 text-center">

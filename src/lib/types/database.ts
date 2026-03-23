@@ -93,6 +93,54 @@ export type Database = {
         }
         Relationships: []
       }
+      matches: {
+        Row: {
+          category: string
+          created_at: string | null
+          day: number
+          id: string
+          match_number: number
+          match_time: string
+          round: string
+          status: string | null
+          team1: string
+          team1_from: string | null
+          team2: string
+          team2_from: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          day: number
+          id?: string
+          match_number: number
+          match_time: string
+          round: string
+          status?: string | null
+          team1: string
+          team1_from?: string | null
+          team2: string
+          team2_from?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          day?: number
+          id?: string
+          match_number?: number
+          match_time?: string
+          round?: string
+          status?: string | null
+          team1?: string
+          team1_from?: string | null
+          team2?: string
+          team2_from?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       registrations: {
         Row: {
           created_at: string | null

@@ -7,18 +7,35 @@ import { apiClient } from '$lib/api/client.js';
 
 export const drawService = {
 	/**
-	 * Get teams for a specific category
+	 * Get teams for a specific category from draw results
 	 */
 	async getTeams(category) {
-		const response = await apiClient.get(`/draw/${category}/teams`);
-		return response.data;
+		try {
+			// Get draw results which contain team names
+			const response = await apiClient.get(`/draw/${category}/results`);
+			const drawResults = response.data;
+			
+			// Extract unique team names from draw results
+			const teams = new Set();
+			drawResults.forEach(match => {
+				if (match.team1 && match.team1 !== '?') teams.add(match.team1);
+				if (match.team2 && match.team2 !== '?') teams.add(match.team2);
+			});
+			
+			// Return as array
+			return Array.from(teams).sort();
+		} catch (error) {
+			console.error(`Failed to get teams for ${category}:`, error);
+			return [];
+		}
 	},
 
 	/**
-	 * Save teams for a specific category
+	 * Save teams for a specific category (not needed since we use registrations)
 	 */
 	async saveTeams(category, teams) {
-		await apiClient.post(`/draw/${category}/teams`, { teams });
+		// Teams are managed through registrations, so this is a no-op
+		console.log(`Teams for ${category} are managed through registrations`);
 	},
 
 	/**

@@ -60,6 +60,42 @@ try {
   app.all('/api/schedule/scores', scheduleScoresHandler);
   console.log('✅ Schedule scores handler loaded');
 
+  // Load settings handler
+  const settingsHandler = (await import('./api/settings.js')).default;
+  app.all('/api/settings', settingsHandler);
+  console.log('✅ Settings handler loaded');
+
+  // Load registrations stats handler
+  const registrationsStatsHandler = (await import('./api/registrations/stats.js')).default;
+  app.all('/api/registrations/stats', registrationsStatsHandler);
+  console.log('✅ Registrations stats handler loaded');
+
+  // Load registrations by ID handler
+  const registrationsByIdHandler = (await import('./api/registrations/[id].js')).default;
+  app.all('/api/registrations/:id', (req, res) => {
+    const mockReq = { ...req, query: { id: req.params.id } };
+    registrationsByIdHandler(mockReq, res);
+  });
+  console.log('✅ Registrations by ID handler loaded');
+
+  // Load matches handler
+  const matchesHandler = (await import('./api/matches/index.js')).default;
+  app.all('/api/matches', matchesHandler);
+  console.log('✅ Matches handler loaded');
+
+  // Load matches by ID handler
+  const matchesByIdHandler = (await import('./api/matches/[id].js')).default;
+  app.all('/api/matches/:id', (req, res) => {
+    const mockReq = { ...req, query: { id: req.params.id } };
+    matchesByIdHandler(mockReq, res);
+  });
+  console.log('✅ Matches by ID handler loaded');
+
+  // Load test matches handler
+  const testMatchesHandler = (await import('./api/test-matches.js')).default;
+  app.all('/api/test-matches', testMatchesHandler);
+  console.log('✅ Test matches handler loaded');
+
   console.log('🎉 All handlers loaded successfully!');
 
 } catch (error) {

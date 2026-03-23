@@ -1,10 +1,13 @@
 import { apiCache } from '$lib/utils/cache.js';
 import { browser } from '$app/environment';
 
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+// Simple, environment-agnostic API URL
+// Works in both dev (Vite proxy) and prod (Vercel serverless)
+const API_URL = '/api';
 
 /**
  * API client with error handling, caching, and authentication
+ * Works seamlessly in development and production
  */
 export const apiClient = {
   async request(endpoint, options = {}) {
@@ -82,6 +85,9 @@ export const apiClient = {
     }
     if (endpoint.includes('/schedule/scores')) {
       apiCache.delete('GET:/schedule/scores');
+    }
+    if (endpoint.includes('/matches')) {
+      apiCache.delete('GET:/matches');
     }
   },
 

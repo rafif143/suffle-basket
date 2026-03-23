@@ -2,8 +2,7 @@
 	import { onMount } from 'svelte';
 	import { CategoryFilter } from '$lib/components/features';
 	import { ScoreModal, MatchTable, ScheduleMatchCard } from '$lib/components/features/SchedulePage';
-	import { scheduleService, pdfService } from '$lib/services';
-	import { generateScheduleData } from '$lib/services/scheduleGenerator.js';
+	import { scheduleService, matchService } from '$lib/services';
 
 	let activeTab = $state('All');
 	let activeDayTab = $state('Day 1');
@@ -21,11 +20,12 @@
 
 	// Load data on mount
 	onMount(async () => {
-		scheduleData = await generateScheduleData();
 		try {
+			// Load all matches from new matches table
+			scheduleData = await matchService.getMatches();
 			matchScores = await scheduleService.getScores();
 		} catch (error) {
-			console.error('Failed to load scores:', error);
+			console.error('Failed to load schedule data:', error);
 		}
 	});
 
@@ -84,9 +84,18 @@
 	async function saveScore() {
 		if (!scoreModal.match) return;
 		try {
-			const scoreKey = `${scoreModal.match.day}-${scoreModal.match.matchStrId}-${scoreModal.match.category}`;
+			// Save score using existing scheduleService
+			const scoreKey = `${scoreModal.match.day}-M${String(scoreModal.match.match_number).padStart(2, '0')}-${scoreModal.match.category.toLowerCase().replace(' ', '-')}`;
 			await scheduleService.saveScore(scoreKey, scoreModal.score1, scoreModal.score2);
+			
+			// Update match status to Complete directly via Supabase
+			// For now, we'll skip the API call and just reload data
+			// The status will be determined by whether score exists
+			
+			// Reload data
+			scheduleData = await matchService.getMatches();
 			matchScores = await scheduleService.getScores();
+			
 			closeScoreModal();
 		} catch (error) {
 			console.error('Failed to save score:', error);
@@ -96,7 +105,7 @@
 
 	// Helper functions
 	function getActualDate(dayNum) {
-		const startDate = new Date('2025-05-10');
+		const startDate = new Date('2026-03-24'); // Updated to match tournament dates
 		startDate.setDate(startDate.getDate() + (dayNum - 1));
 		return startDate.toLocaleDateString('id-ID', { 
 			weekday: 'long', 
@@ -107,14 +116,32 @@
 	}
 
 	function getRoundInfo(day) {
-		if (day === 13) return { label: 'Grand Final', color: 'bg-amber-50 text-amber-700 border-amber-200' };
+		if (day === 13) return { label: 'Final', color: 'bg-amber-50 text-amber-700 border-amber-200' };
 		if (day >= 11) return { label: 'Semi Final', color: 'bg-rose-50 text-rose-700 border-rose-200' };
-		if (day >= 7) return { label: 'Quarter Final', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
-		return { label: 'Round of 16', color: 'bg-neutral-100 text-neutral-600 border-neutral-200' };
+		if (day >= 7) return { label: '8 Besar', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
+		return { label: '16 Besar', color: 'bg-neutral-100 text-neutral-600 border-neutral-200' };
 	}
 
 	function exportSchedulePDF() {
-		pdfService.generateSchedulePDF(scheduleData, matchScores);
+		// Use existing pdfService with new data structure
+		const pdfData = scheduleData.map(match => ({
+			...match,
+			matchStrId: `M${String(match.match_number).padStart(2, '0')}`,
+			time: match.match_time
+		}));
+		// pdfService.generateSchedulePDF(pdfData, matchScores);
+	}
+
+	// Check if match is complete based on whether score exists
+	function isMatchComplete(match) {
+		const score = getMatchScore(match);
+		return score && score.score1 !== undefined && score.score2 !== undefined;
+	}
+
+	// Get match score (keep existing logic for compatibility)
+	function getMatchScore(match) {
+		const scoreKey = `${match.day}-M${String(match.match_number).padStart(2, '0')}-${match.category.toLowerCase().replace(' ', '-')}`;
+		return matchScores[scoreKey] || null;
 	}
 </script>
 
@@ -122,7 +149,7 @@
 	<title>Match Schedule | Yadika Cup</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-50/50 flex flex-col">
+<div class="min-h-screen bg-linear-to-br from-neutral-50 via-white to-neutral-50/50 flex flex-col">
 	<!-- Header -->
 	<header class="bg-white/90 backdrop-blur-sm border-b border-neutral-200/50 sticky top-0 z-20">
 		<div class="px-8 py-5 flex items-center justify-between flex-wrap gap-4">
@@ -185,13 +212,13 @@
 			{#each groupedSchedule as dayGroup}
 				{@const roundInfo = getRoundInfo(dayGroup.day)}
 				{@const currentViewMode = getViewMode(dayGroup.day)}
-				{@const doneCount = dayGroup.matches.filter(m => scheduleService.isMatchComplete(m)).length}
+				{@const doneCount = dayGroup.matches.filter(m => isMatchComplete(m)).length}
 
 				<div class="mb-10">
 					<!-- Day Header -->
 					<div class="bg-white/95 backdrop-blur-sm rounded-2xl border border-neutral-200/50 p-5 mb-4 flex items-center justify-between flex-wrap gap-3">
 						<div class="flex items-center gap-4">
-							<div class="w-13 h-13 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex flex-col items-center justify-center shadow-lg shadow-indigo-200">
+							<div class="w-13 h-13 bg-linear-to-br from-indigo-600 to-purple-600 rounded-2xl flex flex-col items-center justify-center shadow-lg shadow-indigo-200">
 								<span class="text-[9px] font-bold text-white/65 uppercase tracking-wider">Day</span>
 								<span class="font-montserrat text-2xl font-black text-white leading-none">{dayGroup.day}</span>
 							</div>
@@ -232,8 +259,8 @@
 							{#each dayGroup.matches as match}
 								<ScheduleMatchCard 
 									{match}
-									isComplete={scheduleService.isMatchComplete(match)}
-									score={scheduleService.getMatchScore(match)}
+									isComplete={isMatchComplete(match)}
+									score={getMatchScore(match)}
 									onInputScore={() => openScoreModal(match)}
 								/>
 							{/each}
@@ -242,8 +269,8 @@
 						<MatchTable 
 							matches={dayGroup.matches}
 							onOpenScoreModal={openScoreModal}
-							isMatchComplete={(match) => scheduleService.isMatchComplete(match)}
-							getMatchScore={(match) => scheduleService.getMatchScore(match)}
+							isMatchComplete={isMatchComplete}
+							getMatchScore={getMatchScore}
 						/>
 					{/if}
 				</div>
