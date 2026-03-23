@@ -7,6 +7,26 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================
+-- Table: users
+-- Stores admin/organizer accounts
+-- ============================================
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username VARCHAR(50) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL, -- bcrypt hashed password
+  role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'organizer')),
+  full_name VARCHAR(255),
+  email VARCHAR(255),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Index for faster queries
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_role ON users(role);
+
+-- ============================================
 -- Table: registrations
 -- Stores team registration information
 -- ============================================

@@ -27,3 +27,4 @@ src/backend/node_modules
 src/backend/.env
 src/backend/uploads
 src/backend/*.log
+.env*.local

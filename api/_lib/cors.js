@@ -2,9 +2,8 @@
  * CORS middleware for Vercel serverless functions
  */
 export function cors(req, res) {
-  const origin = process.env.CORS_ORIGIN || '*';
-  
-  res.setHeader('Access-Control-Allow-Origin', origin);
+  // Set CORS headers - hardcode for production stability
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', 'true');

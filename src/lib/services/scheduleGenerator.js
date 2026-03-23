@@ -3,10 +3,9 @@
  * Generates match schedule from draw results
  */
 
-import { storage } from '$lib/utils/storage.js';
 import { getMatchTime } from '$lib/utils/match.js';
 
-export function generateScheduleData() {
+export async function generateScheduleData() {
 	const loadedData = [];
 	const categories = [
 		{ key: 'sma-putra', level: 'SMA', gender: 'Putra' },
@@ -16,14 +15,22 @@ export function generateScheduleData() {
 	];
 
 	const allMatchResults = {};
-	categories.forEach(cat => {
-		const saved = storage.get(`results_${cat.key}`);
-		if (saved) {
-			allMatchResults[cat.key] = saved;
-		} else {
+	
+	// Fetch draw results from database for each category
+	for (const cat of categories) {
+		try {
+			const response = await fetch(`/api/draw/${cat.key}/results`);
+			const result = await response.json();
+			if (result.success && result.data) {
+				allMatchResults[cat.key] = result.data;
+			} else {
+				allMatchResults[cat.key] = Array(8).fill(null).map(() => ({ team1: 'TBD', team2: 'TBD' }));
+			}
+		} catch (error) {
+			console.error(`Failed to fetch ${cat.key} results:`, error);
 			allMatchResults[cat.key] = Array(8).fill(null).map(() => ({ team1: 'TBD', team2: 'TBD' }));
 		}
-	});
+	}
 
 	let matchIdCounter = 1;
 	

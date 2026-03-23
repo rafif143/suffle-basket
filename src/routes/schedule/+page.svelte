@@ -21,7 +21,7 @@
 
 	// Load data on mount
 	onMount(async () => {
-		scheduleData = generateScheduleData();
+		scheduleData = await generateScheduleData();
 		try {
 			matchScores = await scheduleService.getScores();
 		} catch (error) {

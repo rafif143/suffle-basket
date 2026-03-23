@@ -1,13 +1,20 @@
 import { supabase } from '../_lib/supabase.js';
 import { cors } from '../_lib/cors.js';
+import { requireAuth, isPublicEndpoint } from '../_lib/auth.js';
 
 /**
  * Registrations endpoint
- * GET /api/registrations - Get all
- * POST /api/registrations - Create new
+ * GET /api/registrations - Get all (PROTECTED)
+ * POST /api/registrations - Create new (PROTECTED)
  */
 export default async function handler(req, res) {
   if (cors(req, res)) return;
+
+  // Check if authentication is required
+  if (!isPublicEndpoint(req)) {
+    const user = requireAuth(req, res);
+    if (!user) return; // Auth failed, response already sent
+  }
 
   try {
     if (req.method === 'GET') {

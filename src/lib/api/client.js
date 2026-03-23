@@ -1,14 +1,24 @@
 import { apiCache } from '$lib/utils/cache.js';
+import { browser } from '$app/environment';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 /**
- * API client with error handling and caching
+ * API client with error handling, caching, and authentication
  */
 export const apiClient = {
   async request(endpoint, options = {}) {
     const url = `${API_URL}${endpoint}`;
     const cacheKey = `${options.method || 'GET'}:${endpoint}`;
+    
+    // Add auth token if available
+    const token = browser ? localStorage.getItem('auth_token') : null;
+    if (token) {
+      options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+      };
+    }
     
     // Check cache for GET requests
     if (!options.method || options.method === 'GET') {
@@ -30,6 +40,12 @@ export const apiClient = {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle auth errors
+        if (response.status === 401 && browser) {
+          localStorage.removeItem('auth_token');
+          window.location.href = '/login';
+          return;
+        }
         throw new Error(data.message || 'API request failed');
       }
 
