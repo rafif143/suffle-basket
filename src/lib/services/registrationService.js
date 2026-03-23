@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from '$lib/api/client.js';
+import { imageOptimizer } from '$lib/utils';
 
 export const registrationService = {
 	/**
@@ -26,14 +27,44 @@ export const registrationService = {
 	 * Save new registration
 	 */
 	async save(registration) {
+		// Compress and convert logo file if exists
+		let logoFile = null;
+		if (registration.logoFile) {
+			try {
+				imageOptimizer.validateImage(registration.logoFile);
+				logoFile = await imageOptimizer.fileToBase64Compressed(registration.logoFile, 400, 0.8);
+			} catch (error) {
+				throw new Error(`Logo upload failed: ${error.message}`);
+			}
+		}
+
+		// Process and compress player cards
+		const processedPlayers = [];
+		for (const player of registration.players) {
+			let cardFile = null;
+			if (player.card) {
+				try {
+					imageOptimizer.validateImage(player.card);
+					cardFile = await imageOptimizer.fileToBase64Compressed(player.card, 600, 0.8);
+				} catch (error) {
+					throw new Error(`Player card upload failed for ${player.name}: ${error.message}`);
+				}
+			}
+			processedPlayers.push({
+				name: player.name,
+				cardFile
+			});
+		}
+
 		const response = await apiClient.post('/registrations', {
 			schoolName: registration.schoolName,
 			schoolAddress: registration.schoolAddress,
 			whatsapp: registration.whatsapp,
 			level: registration.level,
 			gender: registration.gender,
-			players: registration.players,
-			officials: registration.officials
+			players: processedPlayers,
+			officials: registration.officials,
+			logoFile
 		});
 		return response.data;
 	},

@@ -4,3 +4,4 @@ export * from './scheduleService.js';
 export * from './registrationService.js';
 export * from './settingsService.js';
 export * from './scheduleGenerator.js';
+export * from './pdfService.js';

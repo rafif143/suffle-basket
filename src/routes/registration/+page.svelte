@@ -104,8 +104,9 @@
 				whatsapp,
 				level,
 				gender,
-				players: players.map(p => ({ name: p.name })),
-				officials
+				players: players.map(p => ({ name: p.name, card: p.card })),
+				officials,
+				logoFile: schoolLogo
 			};
 
 			await registrationService.save(registrationData);

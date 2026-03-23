@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { CategoryFilter } from '$lib/components/features';
 	import { ScoreModal, MatchTable, ScheduleMatchCard } from '$lib/components/features/SchedulePage';
-	import { scheduleService } from '$lib/services/scheduleService.js';
+	import { scheduleService, pdfService } from '$lib/services';
 	import { generateScheduleData } from '$lib/services/scheduleGenerator.js';
 
 	let activeTab = $state('All');
@@ -112,6 +112,10 @@
 		if (day >= 7) return { label: 'Quarter Final', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
 		return { label: 'Round of 16', color: 'bg-neutral-100 text-neutral-600 border-neutral-200' };
 	}
+
+	function exportSchedulePDF() {
+		pdfService.generateSchedulePDF(scheduleData, matchScores);
+	}
 </script>
 
 <svelte:head>
@@ -127,8 +131,25 @@
 				<p class="text-xs text-neutral-400 mt-1">13-Day Tournament · Yadika Cup</p>
 			</div>
 
-			<!-- Category Filter -->
-			<CategoryFilter {tabs} bind:activeTab />
+			<div class="flex items-center gap-3">
+				<!-- PDF Export Button -->
+				<button 
+					onclick={exportSchedulePDF}
+					class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-poppins font-semibold text-sm rounded-lg transition-colors shadow-sm"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+						<polyline points="14 2 14 8 20 8"/>
+						<line x1="16" y1="13" x2="8" y2="13"/>
+						<line x1="16" y1="17" x2="8" y2="17"/>
+						<polyline points="10 9 9 9 8 9"/>
+					</svg>
+					Export PDF
+				</button>
+
+				<!-- Category Filter -->
+				<CategoryFilter {tabs} bind:activeTab />
+			</div>
 		</div>
 
 		<!-- Day Tabs -->

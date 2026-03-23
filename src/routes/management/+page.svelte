@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { registrationService } from '$lib/services';
 	import { StatsCard, TeamDetailModal } from '$lib/components/features/ManagementPage';
+	import { LoadingSkeleton } from '$lib/components/ui';
 
 	let registrations = $state([]);
 	let loading = $state(true);
@@ -129,74 +130,78 @@
 
 		<!-- Table -->
 		<div class="bg-white/95 backdrop-blur-sm rounded-2xl border border-neutral-200/50 overflow-hidden shadow-sm">
-			<div class="overflow-x-auto">
-				<table class="w-full">
-					<thead class="bg-linear-to-r from-indigo-50 to-white border-b border-neutral-200">
-						<tr>
-							<th class="px-4 py-3.5 text-left text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Logo</th>
-							<th class="px-4 py-3.5 text-left text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Team ID</th>
-							<th class="px-4 py-3.5 text-left text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">School</th>
-							<th class="px-4 py-3.5 text-left text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Category</th>
-							<th class="px-4 py-3.5 text-center text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Players</th>
-							<th class="px-4 py-3.5 text-center text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Status</th>
-							<th class="px-4 py-3.5 text-right text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Action</th>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-neutral-100">
-						{#each filteredTeams as team}
-							<tr class="hover:bg-neutral-50/50 transition-colors">
-								<td class="px-4 py-4">
-									{#if team.logo}
-										<div class="w-10 h-10 rounded-lg border border-neutral-200 bg-neutral-50 flex items-center justify-center overflow-hidden">
-											<img src={team.logo} alt="{team.school} logo" class="w-full h-full object-contain" />
-										</div>
-									{:else}
-										<div class="w-10 h-10 rounded-lg border border-neutral-200 bg-neutral-100 flex items-center justify-center">
-											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-400"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-										</div>
-									{/if}
-								</td>
-								<td class="px-4 py-4">
-									<span class="block font-montserrat text-sm font-extrabold text-indigo-600">{team.id}</span>
-									<span class="block text-[11px] text-neutral-400 mt-0.5">{team.timestamp}</span>
-								</td>
-								<td class="px-4 py-4">
-									<span class="block font-poppins text-sm font-bold text-neutral-900">{team.school}</span>
-									<span class="block text-[11px] text-neutral-500 mt-0.5">+62 {team.whatsapp}</span>
-								</td>
-								<td class="px-4 py-4">
-									<div class="flex gap-1.5">
-										<span class="text-[11px] font-poppins font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">{team.level}</span>
-										<span class="text-[11px] font-poppins font-bold px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">{team.gender}</span>
-									</div>
-								</td>
-								<td class="px-4 py-4 text-center">
-									<span class="inline-flex items-center justify-center w-7 h-7 bg-neutral-100 rounded-lg font-montserrat text-sm font-extrabold text-neutral-700">{team.players.length}</span>
-								</td>
-								<td class="px-4 py-4 text-center">
-									{#if team.status === 'Pending'}
-										<span class="inline-flex bg-amber-100 text-amber-700 border border-amber-200 text-[11px] px-3 py-1 rounded-full font-poppins font-bold">Pending</span>
-									{:else if team.status === 'Verified'}
-										<span class="inline-flex bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] px-3 py-1 rounded-full font-poppins font-bold">Verified</span>
-									{:else}
-										<span class="inline-flex bg-rose-100 text-rose-700 border border-rose-200 text-[11px] px-3 py-1 rounded-full font-poppins font-bold">Rejected</span>
-									{/if}
-								</td>
-								<td class="px-4 py-4 text-right">
-									<button onclick={() => selectedTeam = team} class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-poppins font-semibold text-xs rounded-lg transition-colors">View</button>
-								</td>
-							</tr>
-						{:else}
+			{#if loading}
+				<LoadingSkeleton type="table" count={5} />
+			{:else}
+				<div class="overflow-x-auto">
+					<table class="w-full">
+						<thead class="bg-linear-to-r from-indigo-50 to-white border-b border-neutral-200">
 							<tr>
-								<td colspan="6" class="px-4 py-16 text-center">
-									<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-neutral-300"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-									<p class="font-montserrat text-base font-bold text-neutral-400">No registrations found</p>
-								</td>
+								<th class="px-4 py-3.5 text-left text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Logo</th>
+								<th class="px-4 py-3.5 text-left text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Team ID</th>
+								<th class="px-4 py-3.5 text-left text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">School</th>
+								<th class="px-4 py-3.5 text-left text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Category</th>
+								<th class="px-4 py-3.5 text-center text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Players</th>
+								<th class="px-4 py-3.5 text-center text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Status</th>
+								<th class="px-4 py-3.5 text-right text-[10px] font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide">Action</th>
 							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
+						</thead>
+						<tbody class="divide-y divide-neutral-100">
+							{#each filteredTeams as team}
+								<tr class="hover:bg-neutral-50/50 transition-colors">
+									<td class="px-4 py-4">
+										{#if team.logo}
+											<div class="w-10 h-10 rounded-lg border border-neutral-200 bg-neutral-50 flex items-center justify-center overflow-hidden">
+												<img src={team.logo} alt="{team.school} logo" class="w-full h-full object-contain" />
+											</div>
+										{:else}
+											<div class="w-10 h-10 rounded-lg border border-neutral-200 bg-neutral-100 flex items-center justify-center">
+												<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-400"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+											</div>
+										{/if}
+									</td>
+									<td class="px-4 py-4">
+										<span class="block font-montserrat text-sm font-extrabold text-indigo-600">{team.id}</span>
+										<span class="block text-[11px] text-neutral-400 mt-0.5">{team.timestamp}</span>
+									</td>
+									<td class="px-4 py-4">
+										<span class="block font-poppins text-sm font-bold text-neutral-900">{team.school}</span>
+										<span class="block text-[11px] text-neutral-500 mt-0.5">+62 {team.whatsapp}</span>
+									</td>
+									<td class="px-4 py-4">
+										<div class="flex gap-1.5">
+											<span class="text-[11px] font-poppins font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">{team.level}</span>
+											<span class="text-[11px] font-poppins font-bold px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">{team.gender}</span>
+										</div>
+									</td>
+									<td class="px-4 py-4 text-center">
+										<span class="inline-flex items-center justify-center w-7 h-7 bg-neutral-100 rounded-lg font-montserrat text-sm font-extrabold text-neutral-700">{team.players.length}</span>
+									</td>
+									<td class="px-4 py-4 text-center">
+										{#if team.status === 'Pending'}
+											<span class="inline-flex bg-amber-100 text-amber-700 border border-amber-200 text-[11px] px-3 py-1 rounded-full font-poppins font-bold">Pending</span>
+										{:else if team.status === 'Verified'}
+											<span class="inline-flex bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] px-3 py-1 rounded-full font-poppins font-bold">Verified</span>
+										{:else}
+											<span class="inline-flex bg-rose-100 text-rose-700 border border-rose-200 text-[11px] px-3 py-1 rounded-full font-poppins font-bold">Rejected</span>
+										{/if}
+									</td>
+									<td class="px-4 py-4 text-right">
+										<button onclick={() => selectedTeam = team} class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-poppins font-semibold text-xs rounded-lg transition-colors">View</button>
+									</td>
+								</tr>
+							{:else}
+								<tr>
+									<td colspan="6" class="px-4 py-16 text-center">
+										<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-neutral-300"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+										<p class="font-montserrat text-base font-bold text-neutral-400">No registrations found</p>
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			{/if}
 		</div>
 	</main>
 </div>

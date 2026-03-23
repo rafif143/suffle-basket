@@ -3,9 +3,9 @@
 	import { jsPDF } from "jspdf";
 	import autoTable from "jspdf-autotable";
 	import { NotificationModal } from '$lib/components/ui';
-	import { MatchCard } from '$lib/components/features';
+	import { MatchCard, BracketVisualization } from '$lib/components/features';
 	import { TeamInput, DrawControl } from '$lib/components/features/DrawPage';
-	import { drawService } from '$lib/services';
+	import { drawService, scheduleService, pdfService } from '$lib/services';
 	import { getMatchDay, getMatchTime, getMatchIndexInDay } from '$lib/utils';
 	
 	let activeLevel = $state('SMA');
@@ -13,6 +13,8 @@
 	
 	let teamsInput = $state([]);
 	let drawResults = $state(Array(8).fill({ team1: '?', team2: '?' }));
+	let matchScores = $state({});
+	let showBracket = $state(false);
 	let isShuffling = $state(false);
 	let isModalOpen = $state(false);
 	let shuffleTeam1 = $state('???');
@@ -53,6 +55,7 @@
 	// Load data on mount only
 	onMount(() => {
 		loadData();
+		loadScores();
 	});
 
 	async function loadData() {
@@ -62,6 +65,14 @@
 			drawResults = await drawService.getResults(category);
 		} catch (error) {
 			console.error('Failed to load draw data:', error);
+		}
+	}
+
+	async function loadScores() {
+		try {
+			matchScores = await scheduleService.getScores();
+		} catch (error) {
+			console.error('Failed to load scores:', error);
 		}
 	}
 
@@ -109,32 +120,8 @@
 	}
 
 	function generatePDF() {
-		const doc = new jsPDF();
-		const title = `Tournament Schedule - ${activeLevel} ${activeGender}`;
-		doc.setFontSize(20);
-		doc.text("TOURNAMENT DRAW RESULTS", 105, 15, { align: "center" });
-		doc.setFontSize(14);
-		doc.text(title, 105, 25, { align: "center" });
-		doc.setFontSize(10);
-		doc.text(`Generated: ${new Date().toLocaleString()}`, 105, 32, { align: "center" });
-		
-		const tableData = drawResults.map((r, i) => {
-			const day = getMatchDay(activeLevel, activeGender, i);
-			const time = getMatchTime(day, getMatchIndexInDay(activeLevel, activeGender, i));
-			return [`M${i + 1}`, `Day ${day}`, time, r.team1 === '?' ? 'TBD' : r.team1, 'VS', r.team2 === '?' ? 'TBD' : r.team2];
-		});
-		
-		autoTable(doc, {
-			startY: 40,
-			head: [['Match', 'Day', 'Time', 'Team 1', '', 'Team 2']],
-			body: tableData,
-			theme: 'striped',
-			headStyles: { fillColor: [79, 70, 229], textColor: 255 },
-			styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
-			columnStyles: { 0: { cellWidth: 20 }, 1: { cellWidth: 20 }, 2: { cellWidth: 35 }, 3: { cellWidth: 'auto', fontStyle: 'bold' }, 4: { cellWidth: 15, halign: 'center', textColor: [150, 150, 150] }, 5: { cellWidth: 'auto', fontStyle: 'bold' } }
-		});
-		const category = `${activeLevel.toLowerCase()}-${activeGender.toLowerCase()}`;
-		doc.save(`Draw_Results_${category}.pdf`);
+		const category = `${activeLevel} ${activeGender}`;
+		pdfService.generateBracketPDF(category, drawResults, matchScores);
 	}
 </script>
 
@@ -160,6 +147,7 @@
 							onclick={() => {
 								activeLevel = lvl;
 								loadData();
+								loadScores();
 							}}
 						>
 							{lvl}
@@ -177,6 +165,7 @@
 							onclick={() => {
 								activeGender = gen;
 								loadData();
+								loadScores();
 							}}
 						>
 							{gen}
@@ -202,11 +191,41 @@
 					onGeneratePDF={generatePDF}
 				/>
 
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-					{#each drawResults as match, index}
-						<MatchCard {match} {index} level={activeLevel} gender={activeGender} />
-					{/each}
+				<!-- View Toggle -->
+				<div class="flex items-center justify-between">
+					<h3 class="font-montserrat text-lg font-extrabold text-neutral-900">
+						{showBracket ? 'Tournament Bracket' : 'Draw Results'}
+					</h3>
+					<div class="flex bg-neutral-100 rounded-xl p-0.5 gap-0.5">
+						<button 
+							class="px-4 py-2 rounded-lg font-poppins text-sm font-semibold transition-all {!showBracket ? 'bg-white text-indigo-600 shadow-sm' : 'text-neutral-500'}"
+							onclick={() => showBracket = false}
+						>
+							Draw View
+						</button>
+						<button 
+							class="px-4 py-2 rounded-lg font-poppins text-sm font-semibold transition-all {showBracket ? 'bg-white text-indigo-600 shadow-sm' : 'text-neutral-500'}"
+							onclick={() => showBracket = true}
+						>
+							Bracket View
+						</button>
+					</div>
 				</div>
+
+				{#if showBracket}
+					<BracketVisualization 
+						matches={drawResults} 
+						level={activeLevel} 
+						gender={activeGender}
+						scores={matchScores}
+					/>
+				{:else}
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+						{#each drawResults as match, index}
+							<MatchCard {match} {index} level={activeLevel} gender={activeGender} />
+						{/each}
+					</div>
+				{/if}
 			</div>
 		</div>
 	</main>
