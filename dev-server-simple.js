@@ -51,22 +51,10 @@ try {
   app.all('/api/schedule', scheduleHandler);
   console.log('✅ Schedule handler loaded');
 
-  // Load schedule handler (includes scores)
-  const scheduleHandler = (await import('./api/schedule/index.js')).default;
-  app.all('/api/schedule', scheduleHandler);
-  console.log('✅ Schedule handler loaded');
-
   // Load settings handler
   const settingsHandler = (await import('./api/settings.js')).default;
   app.all('/api/settings', settingsHandler);
   console.log('✅ Settings handler loaded');
-
-  // Load registrations handler
-  const registrationsHandler = (await import('./api/registrations/index.js')).default;
-  app.all('/api/registrations', registrationsHandler);
-  console.log('✅ Registrations handler loaded');
-    registrationsByIdHandler(mockReq, res);
-  });
 
   // Load matches handler
   const matchesHandler = (await import('./api/matches/index.js')).default;

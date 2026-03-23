@@ -21,8 +21,20 @@
 	// Load data on mount
 	onMount(async () => {
 		try {
-			// Load all matches from new matches table
-			scheduleData = await matchService.getMatches();
+			// Load schedule from /schedule endpoint (uses draw_results with correct 6 matches/day logic)
+			const scheduleResponse = await fetch('/api/schedule');
+			const scheduleJson = await scheduleResponse.json();
+			
+			if (scheduleJson.success) {
+				// Transform schedule data to match expected format
+				scheduleData = scheduleJson.data.map(match => ({
+					...match,
+					match_number: parseInt(match.matchStrId.replace('M', '')),
+					match_time: match.time,
+					category: match.category
+				}));
+			}
+			
 			matchScores = await scheduleService.getScores();
 		} catch (error) {
 			console.error('Failed to load schedule data:', error);

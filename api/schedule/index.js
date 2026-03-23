@@ -83,32 +83,53 @@ export default async function handler(req, res) {
       const scheduleData = [];
       let matchId = 1;
 
-      // Category mapping
+      // Category mapping - stagger to fill ~6 matches per day
       const categories = {
-        'sma-putra': { level: 'SMA', gender: 'Putra', dayOffset: 0 },
-        'sma-putri': { level: 'SMA', gender: 'Putri', dayOffset: 0 },
-        'smp-putra': { level: 'SMP', gender: 'Putra', dayOffset: 1 },
-        'smp-putri': { level: 'SMP', gender: 'Putri', dayOffset: 1 }
+        'sma-putra': { level: 'SMA', gender: 'Putra', dayOffset: 0 },   // Day 1-2
+        'sma-putri': { level: 'SMA', gender: 'Putri', dayOffset: 1 },   // Day 2-3 (starts on day 2)
+        'smp-putra': { level: 'SMP', gender: 'Putra', dayOffset: 3 },   // Day 4-5
+        'smp-putri': { level: 'SMP', gender: 'Putri', dayOffset: 4 }    // Day 5-6
       };
 
-      // Time slots
+      // Time slots - 6 matches per day for Round of 16
       const getMatchTime = (matchIndex) => {
         const times = [
-          '15:30 - 16:30',
-          '16:30 - 17:30', 
-          '17:30 - 18:30',
+          '15:00 - 16:00',
+          '16:00 - 17:00', 
+          '17:00 - 18:00',
+          '18:00 - 19:00',
           '19:00 - 20:00',
           '20:00 - 21:00'
         ];
         return times[(matchIndex - 1) % times.length];
       };
 
-      // Create schedule from draw results
+      // Create schedule from draw results with custom day assignment
       drawResults.forEach(draw => {
         const catInfo = categories[draw.category];
         if (!catInfo) return;
 
-        const day = catInfo.dayOffset + Math.floor((draw.match_index - 1) / 4) + 1;
+        let day;
+        const matchIdx = draw.match_index;
+
+        // Custom day assignment to balance ~6 matches per day (32 total matches)
+        if (draw.category === 'sma-putra') {
+          // Day 1: M1-M6 (6 matches)
+          // Day 2: M7-M8 (2 matches)
+          day = matchIdx <= 6 ? 1 : 2;
+        } else if (draw.category === 'sma-putri') {
+          // Day 2: M1-M4 (4 matches) - fills day 2 to 6 total
+          // Day 3: M5-M8 (4 matches)
+          day = matchIdx <= 4 ? 2 : 3;
+        } else if (draw.category === 'smp-putra') {
+          // Day 3: M1-M2 (2 matches) - fills day 3 to 6 total
+          // Day 4: M3-M8 (6 matches)
+          day = matchIdx <= 2 ? 3 : 4;
+        } else if (draw.category === 'smp-putri') {
+          // Day 5: M1-M6 (6 matches)
+          // Day 6: M7-M8 (2 matches)
+          day = matchIdx <= 6 ? 5 : 6;
+        }
         
         const scheduleMatch = {
           id: matchId++,
@@ -126,6 +147,111 @@ export default async function handler(req, res) {
         
         scheduleData.push(scheduleMatch);
       });
+
+      // Generate bracket matches for Quarter Finals (8 Besar), Semi Finals, and Finals
+      const bracketMatches = [];
+      let bracketMatchId = matchId;
+
+      // Quarter Finals (8 Besar) - Day 7-10
+      const quarterFinals = [
+        // Day 7 - SMA
+        { day: 7, category: 'SMA Putra', level: 'SMA', gender: 'Putra', matchNum: 1, time: '15:00 - 16:00', team1: 'Winner M1', team2: 'Winner M2', from1: 'M1', from2: 'M2' },
+        { day: 7, category: 'SMA Putra', level: 'SMA', gender: 'Putra', matchNum: 2, time: '16:00 - 17:00', team1: 'Winner M3', team2: 'Winner M4', from1: 'M3', from2: 'M4' },
+        { day: 7, category: 'SMA Putri', level: 'SMA', gender: 'Putri', matchNum: 1, time: '17:00 - 18:00', team1: 'Winner M1', team2: 'Winner M2', from1: 'M1', from2: 'M2' },
+        { day: 7, category: 'SMA Putri', level: 'SMA', gender: 'Putri', matchNum: 2, time: '18:00 - 19:00', team1: 'Winner M3', team2: 'Winner M4', from1: 'M3', from2: 'M4' },
+        
+        // Day 8 - SMA continued
+        { day: 8, category: 'SMA Putra', level: 'SMA', gender: 'Putra', matchNum: 3, time: '15:00 - 16:00', team1: 'Winner M5', team2: 'Winner M6', from1: 'M5', from2: 'M6' },
+        { day: 8, category: 'SMA Putra', level: 'SMA', gender: 'Putra', matchNum: 4, time: '16:00 - 17:00', team1: 'Winner M7', team2: 'Winner M8', from1: 'M7', from2: 'M8' },
+        { day: 8, category: 'SMA Putri', level: 'SMA', gender: 'Putri', matchNum: 3, time: '17:00 - 18:00', team1: 'Winner M5', team2: 'Winner M6', from1: 'M5', from2: 'M6' },
+        { day: 8, category: 'SMA Putri', level: 'SMA', gender: 'Putri', matchNum: 4, time: '18:00 - 19:00', team1: 'Winner M7', team2: 'Winner M8', from1: 'M7', from2: 'M8' },
+        
+        // Day 9 - SMP
+        { day: 9, category: 'SMP Putra', level: 'SMP', gender: 'Putra', matchNum: 1, time: '15:00 - 16:00', team1: 'Winner M1', team2: 'Winner M2', from1: 'M1', from2: 'M2' },
+        { day: 9, category: 'SMP Putra', level: 'SMP', gender: 'Putra', matchNum: 2, time: '16:00 - 17:00', team1: 'Winner M3', team2: 'Winner M4', from1: 'M3', from2: 'M4' },
+        { day: 9, category: 'SMP Putri', level: 'SMP', gender: 'Putri', matchNum: 1, time: '17:00 - 18:00', team1: 'Winner M1', team2: 'Winner M2', from1: 'M1', from2: 'M2' },
+        { day: 9, category: 'SMP Putri', level: 'SMP', gender: 'Putri', matchNum: 2, time: '18:00 - 19:00', team1: 'Winner M3', team2: 'Winner M4', from1: 'M3', from2: 'M4' },
+        
+        // Day 10 - SMP continued
+        { day: 10, category: 'SMP Putra', level: 'SMP', gender: 'Putra', matchNum: 3, time: '15:00 - 16:00', team1: 'Winner M5', team2: 'Winner M6', from1: 'M5', from2: 'M6' },
+        { day: 10, category: 'SMP Putra', level: 'SMP', gender: 'Putra', matchNum: 4, time: '16:00 - 17:00', team1: 'Winner M7', team2: 'Winner M8', from1: 'M7', from2: 'M8' },
+        { day: 10, category: 'SMP Putri', level: 'SMP', gender: 'Putri', matchNum: 3, time: '17:00 - 18:00', team1: 'Winner M5', team2: 'Winner M6', from1: 'M5', from2: 'M6' },
+        { day: 10, category: 'SMP Putri', level: 'SMP', gender: 'Putri', matchNum: 4, time: '18:00 - 19:00', team1: 'Winner M7', team2: 'Winner M8', from1: 'M7', from2: 'M8' },
+      ];
+
+      quarterFinals.forEach(qf => {
+        bracketMatches.push({
+          id: bracketMatchId++,
+          day: qf.day,
+          matchStrId: `QF${qf.matchNum}`,
+          round: '8 Besar',
+          level: qf.level,
+          gender: qf.gender,
+          category: qf.category,
+          team1: qf.team1,
+          team2: qf.team2,
+          time: qf.time,
+          match_key: `${qf.day}-QF${qf.matchNum}-${qf.category.toLowerCase().replace(' ', '-')}`
+        });
+      });
+
+      // Semi Finals - Day 11-12
+      const semiFinals = [
+        // Day 11 - SMA
+        { day: 11, category: 'SMA Putra', level: 'SMA', gender: 'Putra', matchNum: 1, time: '15:00 - 16:00', team1: 'Winner QF1', team2: 'Winner QF2' },
+        { day: 11, category: 'SMA Putra', level: 'SMA', gender: 'Putra', matchNum: 2, time: '16:00 - 17:00', team1: 'Winner QF3', team2: 'Winner QF4' },
+        { day: 11, category: 'SMA Putri', level: 'SMA', gender: 'Putri', matchNum: 1, time: '17:00 - 18:00', team1: 'Winner QF1', team2: 'Winner QF2' },
+        { day: 11, category: 'SMA Putri', level: 'SMA', gender: 'Putri', matchNum: 2, time: '18:00 - 19:00', team1: 'Winner QF3', team2: 'Winner QF4' },
+        
+        // Day 12 - SMP
+        { day: 12, category: 'SMP Putra', level: 'SMP', gender: 'Putra', matchNum: 1, time: '15:00 - 16:00', team1: 'Winner QF1', team2: 'Winner QF2' },
+        { day: 12, category: 'SMP Putra', level: 'SMP', gender: 'Putra', matchNum: 2, time: '16:00 - 17:00', team1: 'Winner QF3', team2: 'Winner QF4' },
+        { day: 12, category: 'SMP Putri', level: 'SMP', gender: 'Putri', matchNum: 1, time: '17:00 - 18:00', team1: 'Winner QF1', team2: 'Winner QF2' },
+        { day: 12, category: 'SMP Putri', level: 'SMP', gender: 'Putri', matchNum: 2, time: '18:00 - 19:00', team1: 'Winner QF3', team2: 'Winner QF4' },
+      ];
+
+      semiFinals.forEach(sf => {
+        bracketMatches.push({
+          id: bracketMatchId++,
+          day: sf.day,
+          matchStrId: `SF${sf.matchNum}`,
+          round: 'Semi Final',
+          level: sf.level,
+          gender: sf.gender,
+          category: sf.category,
+          team1: sf.team1,
+          team2: sf.team2,
+          time: sf.time,
+          match_key: `${sf.day}-SF${sf.matchNum}-${sf.category.toLowerCase().replace(' ', '-')}`
+        });
+      });
+
+      // Finals - Day 13
+      const finals = [
+        { day: 13, category: 'SMA Putra', level: 'SMA', gender: 'Putra', time: '15:00 - 16:00', team1: 'Winner SF1', team2: 'Winner SF2' },
+        { day: 13, category: 'SMA Putri', level: 'SMA', gender: 'Putri', time: '16:00 - 17:00', team1: 'Winner SF1', team2: 'Winner SF2' },
+        { day: 13, category: 'SMP Putra', level: 'SMP', gender: 'Putra', time: '17:00 - 18:00', team1: 'Winner SF1', team2: 'Winner SF2' },
+        { day: 13, category: 'SMP Putri', level: 'SMP', gender: 'Putri', time: '18:00 - 19:00', team1: 'Winner SF1', team2: 'Winner SF2' },
+      ];
+
+      finals.forEach(f => {
+        bracketMatches.push({
+          id: bracketMatchId++,
+          day: f.day,
+          matchStrId: 'F1',
+          round: 'Final',
+          level: f.level,
+          gender: f.gender,
+          category: f.category,
+          team1: f.team1,
+          team2: f.team2,
+          time: f.time,
+          match_key: `${f.day}-F1-${f.category.toLowerCase().replace(' ', '-')}`
+        });
+      });
+
+      // Combine all matches
+      scheduleData.push(...bracketMatches);
 
       return res.status(200).json({
         success: true,
