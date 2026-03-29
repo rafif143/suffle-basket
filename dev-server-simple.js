@@ -66,6 +66,11 @@ try {
   app.all('/api/test-matches', testMatchesHandler);
   console.log('✅ Test matches handler loaded');
 
+  // Load dev draw actions handler
+  const devDrawActionsHandler = (await import('./api/dev/draw-actions.js')).default;
+  app.all('/api/dev/draw-actions', devDrawActionsHandler);
+  console.log('✅ Dev draw actions handler loaded');
+
   console.log('🎉 All handlers loaded successfully!');
 
 } catch (error) {

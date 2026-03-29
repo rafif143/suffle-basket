@@ -11,13 +11,13 @@
 		onInputScore
 	} = $props();
 	
-	const day = getMatchDay(level, gender, index);
-	const time = getMatchTime(day, getMatchIndexInDay(level, gender, index));
+	let day = $derived(getMatchDay(level, gender, index));
+	let time = $derived(getMatchTime(day, getMatchIndexInDay(level, gender, index)));
 </script>
 
 <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-neutral-200/50 shadow-sm overflow-hidden hover:shadow-md transition-shadow {isComplete ? 'ring-2 ring-green-500/50' : ''}">
 	<!-- Header -->
-	<div class="bg-gradient-to-r from-indigo-50 to-white px-4 py-3 border-b border-neutral-100">
+	<div class="bg-linear-to-r from-indigo-50 to-white px-4 py-3 border-b border-neutral-100">
 		<div class="flex items-center justify-between mb-2">
 			<div class="flex items-center gap-2">
 				<span class="font-montserrat font-bold text-base text-indigo-600">MATCH {String(index + 1).padStart(2, '0')}</span>
@@ -48,7 +48,7 @@
 		<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white border-2 border-indigo-600 rounded-full flex items-center justify-center text-xs font-montserrat font-black text-indigo-600 z-10 shadow-sm">VS</div>
 		
 		<!-- Team 1 -->
-		<div class="flex items-center gap-3 rounded-lg border-2 border-indigo-600 bg-gradient-to-r from-indigo-50 to-white p-3.5 hover:shadow-sm transition-shadow">
+		<div class="flex items-center gap-3 rounded-lg border-2 border-indigo-600 bg-linear-to-r from-indigo-50 to-white p-3.5 hover:shadow-sm transition-shadow">
 			<div class="w-1.5 h-10 rounded-full bg-indigo-600 shadow-sm"></div>
 			<div class="flex-1 min-w-0">
 				<div class="text-[10px] font-poppins font-medium text-indigo-600 mb-0.5 uppercase tracking-wide">Team 1</div>

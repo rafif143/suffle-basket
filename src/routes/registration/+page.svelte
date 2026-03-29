@@ -147,31 +147,57 @@
 	<title>Registration | Yadika Cup</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-50/50 flex flex-col">
-	<!-- Header -->
-	<header class="bg-white/90 backdrop-blur-sm border-b border-neutral-200/50 sticky top-0 z-20">
-		<div class="px-8 py-5 flex items-center justify-between flex-wrap gap-4">
-			<div>
-				<h1 class="font-montserrat text-2xl font-extrabold text-neutral-900">Team Registration</h1>
-				<p class="text-xs text-neutral-400 mt-1">Register your school team for Yadika Cup Championship</p>
+<div class="min-h-screen bg-linear-to-br from-[#0f1123] via-[#1a1d35] to-[#0f1123] flex flex-col">
+	<!-- Hero Header -->
+	<header class="relative overflow-hidden">
+		<!-- Background decoration -->
+		<div class="absolute inset-0 bg-linear-to-br from-indigo-600/20 via-purple-600/10 to-transparent pointer-events-none"></div>
+		<div class="absolute -top-24 -right-24 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+		<div class="relative px-6 pt-7 pb-6 flex flex-col items-center text-center max-w-2xl mx-auto">
+			<!-- Logo / Brand -->
+			<div class="flex items-center gap-2 mb-3">
+				<div class="w-7 h-7 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md shadow-indigo-500/30">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<rect width="12" height="12" x="2" y="10" rx="2" ry="2"/>
+						<path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/>
+						<path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/>
+					</svg>
+				</div>
+				<span class="font-montserrat font-black text-sm text-white/60 tracking-widest uppercase">Yadika Cup · Basketball Championship 2026</span>
 			</div>
-			<div class="flex gap-2.5">
-				<div class="flex bg-neutral-100 rounded-xl p-0.5 gap-0.5">
-					{#each ['SMA', 'SMP'] as l}
-						<button type="button" class="px-4 py-1.5 rounded-lg font-poppins text-sm font-semibold transition-all {level === l ? 'bg-white text-indigo-600 shadow-sm' : 'text-neutral-500'}" onclick={() => level = l}>{l}</button>
-					{/each}
-				</div>
-				<div class="flex bg-neutral-100 rounded-xl p-0.5 gap-0.5">
-					{#each ['Putra', 'Putri'] as g}
-						<button type="button" class="px-4 py-1.5 rounded-lg font-poppins text-sm font-semibold transition-all {gender === g ? 'bg-white text-indigo-600 shadow-sm' : 'text-neutral-500'}" onclick={() => gender = g}>{g}</button>
-					{/each}
-				</div>
+			<h1 class="font-montserrat text-2xl font-black text-white leading-tight">
+				Team Registration <span class="text-white font-semibold">— {level} {gender}</span>
+			</h1>
+		</div>
+
+		<!-- Category Tabs -->
+		<div class="relative px-6 pb-5 flex justify-center">
+			<div class="flex bg-white/10 border border-white/15 rounded-2xl p-1 gap-1 w-full max-w-2xl">
+				{#each [
+					{ label: 'SMA Putra', lv: 'SMA', gd: 'Putra' },
+					{ label: 'SMA Putri', lv: 'SMA', gd: 'Putri' },
+					{ label: 'SMP Putra', lv: 'SMP', gd: 'Putra' },
+					{ label: 'SMP Putri', lv: 'SMP', gd: 'Putri' }
+				] as tab}
+					{@const isActive = level === tab.lv && gender === tab.gd}
+					<button
+						type="button"
+						onclick={() => { level = tab.lv; gender = tab.gd; }}
+						class="flex-1 py-2.5 rounded-xl font-poppins text-xs font-semibold transition-all
+							{isActive
+								? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/50'
+								: 'text-white/50 hover:text-white hover:bg-white/5'}"
+					>
+						{tab.label}
+					</button>
+				{/each}
 			</div>
 		</div>
 	</header>
 
 	<!-- Form -->
-	<main class="flex-1 px-8 py-7">
+	<main class="flex-1 px-6 py-8 bg-neutral-50/95">
 		<form onsubmit={handleSubmit} class="max-w-3xl mx-auto space-y-5">
 
 			<!-- Section 1: School Info -->

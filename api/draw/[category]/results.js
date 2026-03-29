@@ -21,6 +21,14 @@ export default async function handler(req, res) {
 
       if (error) throw error;
 
+      // If no draw results yet, return empty array with placeholders
+      if (!data || data.length === 0) {
+        return res.status(200).json({
+          success: true,
+          data: Array(8).fill({ team1: '?', team2: '?' })
+        });
+      }
+
       const formattedResults = data.map(r => ({
         team1: r.team1,
         team2: r.team2
@@ -28,7 +36,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         success: true,
-        data: formattedResults.length > 0 ? formattedResults : Array(8).fill({ team1: '?', team2: '?' })
+        data: formattedResults
       });
     }
 

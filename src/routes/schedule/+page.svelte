@@ -100,13 +100,14 @@
 			const scoreKey = `${scoreModal.match.day}-M${String(scoreModal.match.match_number).padStart(2, '0')}-${scoreModal.match.category.toLowerCase().replace(' ', '-')}`;
 			await scheduleService.saveScore(scoreKey, scoreModal.score1, scoreModal.score2);
 			
-			// Update match status to Complete directly via Supabase
-			// For now, we'll skip the API call and just reload data
-			// The status will be determined by whether score exists
-			
-			// Reload data
-			scheduleData = await matchService.getMatches();
-			matchScores = await scheduleService.getScores();
+			// Optimistic local update — langsung update matchScores tanpa refetch
+			matchScores = {
+				...matchScores,
+				[scoreKey]: {
+					score1: parseInt(scoreModal.score1),
+					score2: parseInt(scoreModal.score2)
+				}
+			};
 			
 			closeScoreModal();
 		} catch (error) {
@@ -174,14 +175,11 @@
 				<!-- PDF Export Button -->
 				<button 
 					onclick={exportSchedulePDF}
-					class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-poppins font-semibold text-sm rounded-lg transition-colors shadow-sm"
+					class="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-neutral-50 border border-neutral-200 hover:border-neutral-300 text-neutral-600 hover:text-neutral-900 font-poppins font-semibold text-xs rounded-xl transition-all shadow-sm"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-						<polyline points="14 2 14 8 20 8"/>
-						<line x1="16" y1="13" x2="8" y2="13"/>
-						<line x1="16" y1="17" x2="8" y2="17"/>
-						<polyline points="10 9 9 9 8 9"/>
+					<!-- Heroicon: document-arrow-down -->
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 shrink-0 text-neutral-500">
+						<path fill-rule="evenodd" d="M4.5 2A1.5 1.5 0 0 0 3 3.5v13A1.5 1.5 0 0 0 4.5 18h11a1.5 1.5 0 0 0 1.5-1.5V7.621a1.5 1.5 0 0 0-.44-1.06l-4.12-4.122A1.5 1.5 0 0 0 11.378 2H4.5Zm4.75 6.75a.75.75 0 0 1 1.5 0v2.546l.943-1.048a.75.75 0 1 1 1.114 1.004l-2.25 2.5a.75.75 0 0 1-1.114 0l-2.25-2.5a.75.75 0 1 1 1.114-1.004l.943 1.048V8.75Z" clip-rule="evenodd" />
 					</svg>
 					Export PDF
 				</button>

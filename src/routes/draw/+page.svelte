@@ -7,6 +7,7 @@
 	import { TeamInput, DrawControl } from '$lib/components/features/DrawPage';
 	import { drawService, scheduleService, pdfService } from '$lib/services';
 	import { getMatchDay, getMatchTime, getMatchIndexInDay } from '$lib/utils';
+	import { apiCache } from '$lib/utils/cache.js';
 	
 	let activeLevel = $state('SMA');
 	let activeGender = $state('Putra');
@@ -36,6 +37,14 @@
 				alert('Failed to reset draw. Please try again.');
 			}
 		}
+	});
+
+	let devModal = $state({
+		isOpen: false,
+		title: '',
+		message: '',
+		isProcessing: false,
+		onConfirm: null
 	});
 
 	let drawModal = $state({
@@ -123,6 +132,73 @@
 		const category = `${activeLevel} ${activeGender}`;
 		pdfService.generateBracketPDF(category, drawResults, matchScores);
 	}
+
+	// Dev mode functions
+	async function handleDrawAll() {
+		devModal.title = 'Draw All Categories';
+		devModal.message = 'This will automatically draw all 4 categories (SMA Putra, SMA Putri, SMP Putra, SMP Putri). Continue?';
+		devModal.onConfirm = async () => {
+			devModal.isProcessing = true;
+			try {
+				const response = await fetch('/api/dev/draw-actions?action=draw-all', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				});
+				const data = await response.json();
+				
+				if (data.success) {
+					// Clear cache dulu biar loadData fetch fresh dari server
+					apiCache.clear();
+					drawResults = Array(8).fill({ team1: '?', team2: '?' });
+					await loadData();
+					await loadScores();
+				} else {
+					console.error('Failed to draw all categories');
+				}
+			} catch (error) {
+				console.error('Failed to draw all:', error);
+			} finally {
+				devModal.isProcessing = false;
+				devModal.isOpen = false;
+			}
+		};
+		devModal.isOpen = true;
+	}
+
+	async function handleDeleteAll() {
+		devModal.title = '⚠️ Delete All Draw Data';
+		devModal.message = 'This will DELETE ALL data from draw_results, matches, and match_scores tables. This action cannot be undone. Continue?';
+		devModal.onConfirm = async () => {
+			devModal.isProcessing = true;
+			try {
+				const response = await fetch('/api/dev/draw-actions?action=delete-all', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				});
+				const data = await response.json();
+				
+				if (data.success) {
+					// Clear cache dulu biar loadData/loadScores fetch fresh dari server
+					apiCache.clear();
+					// Reset local state langsung biar UI keliatan perubahan tanpa reload
+					drawResults = Array(8).fill({ team1: '?', team2: '?' });
+					teamsInput = [];
+					matchScores = {};
+					// Lalu sync ulang dari server
+					await loadData();
+					await loadScores();
+				} else {
+					console.error('Failed to delete draw data');
+				}
+			} catch (error) {
+				console.error('Failed to delete all:', error);
+			} finally {
+				devModal.isProcessing = false;
+				devModal.isOpen = false;
+			}
+		};
+		devModal.isOpen = true;
+	}
 </script>
 
 <svelte:head>
@@ -136,7 +212,33 @@
 				<h1 class="font-montserrat font-black text-3xl text-neutral-900">Championship Draw</h1>
 				<p class="font-poppins text-sm text-neutral-500 mt-1">Generate tournament brackets</p>
 			</div>
-			<div class="flex gap-3">
+			<div class="flex gap-3 flex-wrap">
+				<!-- Dev Mode Buttons -->
+				<div class="flex items-center gap-1.5 bg-neutral-100 border border-neutral-200 p-1 rounded-xl">
+					<button
+						onclick={handleDrawAll}
+						class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-poppins font-semibold text-xs bg-indigo-600 hover:bg-indigo-700 text-white transition-all shadow-sm"
+						title="Auto draw all categories"
+					>
+						<!-- Heroicon: arrow-path (refresh/draw) -->
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
+							<path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H3.989a.75.75 0 0 0-.75.75v4.242a.75.75 0 0 0 1.5 0v-2.43l.31.31a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39Zm1.23-3.723a.75.75 0 0 0 .219-.53V2.929a.75.75 0 0 0-1.5 0V5.36l-.31-.31A7 7 0 0 0 3.239 8.188a.75.75 0 1 0 1.448.389A5.5 5.5 0 0 1 13.89 6.11l.311.31h-2.432a.75.75 0 0 0 0 1.5h4.243a.75.75 0 0 0 .53-.219Z" clip-rule="evenodd" />
+						</svg>
+						Draw All
+					</button>
+					<button
+						onclick={handleDeleteAll}
+						class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-poppins font-semibold text-xs bg-white hover:bg-red-50 border border-neutral-200 hover:border-red-200 text-neutral-600 hover:text-red-600 transition-all"
+						title="Delete all draw data"
+					>
+						<!-- Heroicon: trash -->
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
+							<path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" />
+						</svg>
+						Delete All
+					</button>
+				</div>
+
 				<!-- Level Toggle -->
 				<div class="flex gap-2 bg-neutral-100 p-1 rounded-lg">
 					{#each ['SMA', 'SMP'] as lvl}
@@ -238,6 +340,41 @@
 
 <NotificationModal isOpen={resetModal.isOpen} title={resetModal.title} message={resetModal.message} type="confirm" onConfirm={resetModal.onConfirm} onClose={() => resetModal.isOpen = false} onCancel={() => resetModal.isOpen = false} />
 <NotificationModal isOpen={drawModal.isOpen} title={drawModal.title} message={drawModal.message} type="confirm" onConfirm={drawModal.onConfirm} onClose={() => drawModal.isOpen = false} onCancel={() => drawModal.isOpen = false} />
+
+<!-- Dev Mode Modal -->
+{#if devModal.isOpen}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/90 backdrop-blur-sm">
+		<div class="bg-white rounded-2xl border border-neutral-200 p-8 max-w-md w-full mx-4 shadow-2xl">
+			<h3 class="font-montserrat text-xl font-bold text-neutral-900 mb-3">{devModal.title}</h3>
+			<p class="text-sm text-neutral-600 leading-relaxed mb-6">{devModal.message}</p>
+			
+			{#if devModal.isProcessing}
+				<div class="flex items-center justify-center gap-3 py-4">
+					<svg class="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+					</svg>
+					<span class="text-sm font-medium text-neutral-600">Processing...</span>
+				</div>
+			{:else}
+				<div class="flex gap-3">
+					<button
+						onclick={() => devModal.isOpen = false}
+						class="flex-1 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-poppins font-semibold text-sm rounded-lg transition-colors"
+					>
+						Cancel
+					</button>
+					<button
+						onclick={devModal.onConfirm}
+						class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-poppins font-semibold text-sm rounded-lg transition-colors shadow-lg shadow-indigo-200"
+					>
+						Confirm
+					</button>
+				</div>
+			{/if}
+		</div>
+	</div>
+{/if}
 
 {#if isModalOpen}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/95 backdrop-blur-sm">

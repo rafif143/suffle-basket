@@ -80,6 +80,13 @@ export default async function handler(req, res) {
 
       if (error) throw error;
 
+      // Filter out empty draws (where team1 or team2 is '?' or null)
+      const validDrawResults = drawResults.filter(draw => 
+        draw.team1 && draw.team2 && 
+        draw.team1 !== '?' && draw.team2 !== '?' &&
+        draw.team1 !== 'TBD' && draw.team2 !== 'TBD'
+      );
+
       const scheduleData = [];
       let matchId = 1;
 
@@ -101,11 +108,12 @@ export default async function handler(req, res) {
           '19:00 - 20:00',
           '20:00 - 21:00'
         ];
-        return times[(matchIndex - 1) % times.length];
+        // matchIndex is 0-based (0-7), so use modulo directly
+        return times[matchIndex % times.length];
       };
 
       // Create schedule from draw results with custom day assignment
-      drawResults.forEach(draw => {
+      validDrawResults.forEach(draw => {
         const catInfo = categories[draw.category];
         if (!catInfo) return;
 
@@ -113,22 +121,23 @@ export default async function handler(req, res) {
         const matchIdx = draw.match_index;
 
         // Custom day assignment to balance ~6 matches per day (32 total matches)
+        // match_index is 0-based (0-7)
         if (draw.category === 'sma-putra') {
-          // Day 1: M1-M6 (6 matches)
-          // Day 2: M7-M8 (2 matches)
-          day = matchIdx <= 6 ? 1 : 2;
+          // Day 1: M0-M5 (6 matches)
+          // Day 2: M6-M7 (2 matches)
+          day = matchIdx <= 5 ? 1 : 2;
         } else if (draw.category === 'sma-putri') {
-          // Day 2: M1-M4 (4 matches) - fills day 2 to 6 total
-          // Day 3: M5-M8 (4 matches)
-          day = matchIdx <= 4 ? 2 : 3;
+          // Day 2: M0-M3 (4 matches) - fills day 2 to 6 total
+          // Day 3: M4-M7 (4 matches)
+          day = matchIdx <= 3 ? 2 : 3;
         } else if (draw.category === 'smp-putra') {
-          // Day 3: M1-M2 (2 matches) - fills day 3 to 6 total
-          // Day 4: M3-M8 (6 matches)
-          day = matchIdx <= 2 ? 3 : 4;
+          // Day 3: M0-M1 (2 matches) - fills day 3 to 6 total
+          // Day 4: M2-M7 (6 matches)
+          day = matchIdx <= 1 ? 3 : 4;
         } else if (draw.category === 'smp-putri') {
-          // Day 5: M1-M6 (6 matches)
-          // Day 6: M7-M8 (2 matches)
-          day = matchIdx <= 6 ? 5 : 6;
+          // Day 5: M0-M5 (6 matches)
+          // Day 6: M6-M7 (2 matches)
+          day = matchIdx <= 5 ? 5 : 6;
         }
         
         const scheduleMatch = {

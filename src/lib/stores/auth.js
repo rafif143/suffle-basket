@@ -28,9 +28,11 @@ function createAuthStore() {
 				const data = await response.json();
 
 				if (data.success) {
-					// Store token in localStorage
+					// Store token in localStorage AND cookie (for server-side guard)
 					if (browser) {
 						localStorage.setItem('auth_token', data.token);
+						// Set cookie agar bisa di-verify di hooks.server.js
+						document.cookie = `auth_token=${data.token}; path=/; SameSite=Strict; max-age=${60 * 60 * 24 * 7}`; // 7 hari
 					}
 					
 					set({
@@ -54,6 +56,8 @@ function createAuthStore() {
 		logout: () => {
 			if (browser) {
 				localStorage.removeItem('auth_token');
+				// Hapus cookie juga
+				document.cookie = 'auth_token=; path=/; SameSite=Strict; max-age=0';
 			}
 			set({
 				isAuthenticated: false,

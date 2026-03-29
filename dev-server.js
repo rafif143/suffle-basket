@@ -22,7 +22,8 @@ try {
     drawResults: (await import('./api/draw/[category]/results.js')).default,
     schedule: (await import('./api/schedule/index.js')).default,
     matches: (await import('./api/matches/index.js')).default,
-    settings: (await import('./api/settings.js')).default
+    settings: (await import('./api/settings.js')).default,
+    devDrawActions: (await import('./api/dev/draw-actions.js')).default
   };
   console.log('✅ All API handlers loaded successfully');
 } catch (error) {
@@ -49,6 +50,7 @@ app.all('/api/draw/:category/results', (req, res) => {
 app.all('/api/schedule', handlers.schedule);
 app.all('/api/matches', handlers.matches);
 app.all('/api/settings', handlers.settings);
+app.all('/api/dev/draw-actions', handlers.devDrawActions);
 
 app.listen(PORT, () => {
   console.log(`

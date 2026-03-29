@@ -41,6 +41,9 @@
 		}
 	}
 
+	let currentPage = $state(1);
+	const pageSize = 10;
+
 	let filteredTeams = $derived(
 		registrations.filter(t => {
 			const matchSearch = t.school.toLowerCase().includes(searchQuery.toLowerCase()) || t.id.toLowerCase().includes(searchQuery.toLowerCase());
@@ -49,6 +52,32 @@
 			return matchSearch && matchLevel && matchStatus;
 		})
 	);
+
+	// Reset ke page 1 kalau filter/search berubah
+	$effect(() => {
+		searchQuery; filterLevel; filterStatus;
+		currentPage = 1;
+	});
+
+	let totalPages = $derived(Math.max(1, Math.ceil(filteredTeams.length / pageSize)));
+
+	let paginatedTeams = $derived(
+		filteredTeams.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+	);
+
+	// Generate array nomor halaman dengan ellipsis
+	let pageNumbers = $derived.by(() => {
+		if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+		const pages = [];
+		pages.push(1);
+		if (currentPage > 3) pages.push('...');
+		for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+			pages.push(i);
+		}
+		if (currentPage < totalPages - 2) pages.push('...');
+		pages.push(totalPages);
+		return pages;
+	});
 
 	let stats = $derived({
 		total: registrations.length,
@@ -68,6 +97,20 @@
 		} catch (error) {
 			console.error('Failed to update status:', error);
 			alert('Failed to update status. Please try again.');
+		}
+	}
+
+	async function deleteTeam(id) {
+		try {
+			await registrationService.delete(id);
+			// Remove from local state
+			registrations = registrations.filter(r => r.id !== id);
+			// Close modal
+			selectedTeam = null;
+			alert('✅ Registration deleted successfully!');
+		} catch (error) {
+			console.error('Failed to delete registration:', error);
+			alert('❌ Failed to delete registration. Please try again.');
 		}
 	}
 
@@ -147,7 +190,7 @@
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-neutral-100">
-							{#each filteredTeams as team}
+							{#each paginatedTeams as team}
 								<tr class="hover:bg-neutral-50/50 transition-colors">
 									<td class="px-4 py-4">
 										{#if team.logo}
@@ -187,7 +230,25 @@
 										{/if}
 									</td>
 									<td class="px-4 py-4 text-right">
-										<button onclick={() => selectedTeam = team} class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-poppins font-semibold text-xs rounded-lg transition-colors">View</button>
+										<div class="flex items-center justify-end gap-2">
+											<button 
+												onclick={() => selectedTeam = team} 
+												class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-poppins font-semibold text-xs rounded-lg transition-colors"
+											>
+												View
+											</button>
+											<button 
+												onclick={async () => {
+													if (confirm(`Delete ${team.school}? This cannot be undone.`)) {
+														await deleteTeam(team.id);
+													}
+												}}
+												class="p-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 rounded-lg transition-colors"
+												title="Delete registration"
+											>
+												<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+											</button>
+										</div>
 									</td>
 								</tr>
 							{:else}
@@ -201,6 +262,66 @@
 						</tbody>
 					</table>
 				</div>
+
+				<!-- Pagination -->
+				{#if totalPages > 1 || filteredTeams.length > 0}
+					<div class="flex items-center justify-between px-5 py-3.5 border-t border-neutral-100">
+						<!-- Info -->
+						<p class="text-xs font-poppins text-neutral-400">
+							Showing <span class="font-semibold text-neutral-600">{(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredTeams.length)}</span> of <span class="font-semibold text-neutral-600">{filteredTeams.length}</span> teams
+						</p>
+
+						<!-- Controls -->
+						<div class="flex items-center gap-1">
+							<!-- Prev -->
+							<button
+								onclick={() => currentPage = Math.max(1, currentPage - 1)}
+								disabled={currentPage === 1}
+								class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-poppins text-xs font-semibold transition-all border
+									{currentPage === 1
+										? 'border-neutral-100 text-neutral-300 cursor-not-allowed'
+										: 'border-neutral-200 text-neutral-600 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50'}"
+							>
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
+									<path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"/>
+								</svg>
+								Prev
+							</button>
+
+							<!-- Page Numbers -->
+							{#each pageNumbers as page}
+								{#if page === '...'}
+									<span class="px-2 py-1.5 text-xs text-neutral-400 font-poppins">…</span>
+								{:else}
+									<button
+										onclick={() => currentPage = page}
+										class="min-w-[32px] h-8 px-2 rounded-lg font-poppins text-xs font-semibold transition-all border
+											{currentPage === page
+												? 'bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-200'
+												: 'border-neutral-200 text-neutral-600 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50'}"
+									>
+										{page}
+									</button>
+								{/if}
+							{/each}
+
+							<!-- Next -->
+							<button
+								onclick={() => currentPage = Math.min(totalPages, currentPage + 1)}
+								disabled={currentPage === totalPages}
+								class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-poppins text-xs font-semibold transition-all border
+									{currentPage === totalPages
+										? 'border-neutral-100 text-neutral-300 cursor-not-allowed'
+										: 'border-neutral-200 text-neutral-600 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50'}"
+							>
+								Next
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5">
+									<path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/>
+								</svg>
+							</button>
+						</div>
+					</div>
+				{/if}
 			{/if}
 		</div>
 	</main>
@@ -211,4 +332,5 @@
 	team={selectedTeam}
 	onClose={closeDetail}
 	onUpdateStatus={updateStatus}
+	onDelete={deleteTeam}
 />

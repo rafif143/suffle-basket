@@ -7,23 +7,30 @@ import { apiClient } from '$lib/api/client.js';
 
 export const drawService = {
 	/**
-	 * Get teams for a specific category from draw results
+	 * Get teams for a specific category from verified registrations
 	 */
 	async getTeams(category) {
 		try {
-			// Get draw results which contain team names
-			const response = await apiClient.get(`/draw/${category}/results`);
-			const drawResults = response.data;
+			// Parse category (e.g., "sma-putra" -> level: "SMA", gender: "Putra")
+			const parts = category.split('-');
+			const level = parts[0].toUpperCase(); // SMA or SMP
+			const gender = parts[1].charAt(0).toUpperCase() + parts[1].slice(1); // Putra or Putri
 			
-			// Extract unique team names from draw results
-			const teams = new Set();
-			drawResults.forEach(match => {
-				if (match.team1 && match.team1 !== '?') teams.add(match.team1);
-				if (match.team2 && match.team2 !== '?') teams.add(match.team2);
-			});
+			// Get verified registrations for this category
+			const response = await apiClient.get('/registrations');
+			const registrations = response.data;
 			
-			// Return as array
-			return Array.from(teams).sort();
+			// Filter by category and status
+			const verifiedTeams = registrations
+				.filter(reg => 
+					reg.level === level && 
+					reg.gender === gender && 
+					reg.status === 'Verified'
+				)
+				.map(reg => reg.school_name)
+				.sort();
+			
+			return verifiedTeams;
 		} catch (error) {
 			console.error(`Failed to get teams for ${category}:`, error);
 			return [];
