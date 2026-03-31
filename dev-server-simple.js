@@ -41,7 +41,7 @@ try {
   // Load draw results handler
   const drawResultsHandler = (await import('./api/draw/[category]/results.js')).default;
   app.all('/api/draw/:category/results', (req, res) => {
-    const mockReq = { ...req, query: { category: req.params.category } };
+    const mockReq = { ...req, query: { ...req.query, category: req.params.category } };
     drawResultsHandler(mockReq, res);
   });
   console.log('✅ Draw results handler loaded');

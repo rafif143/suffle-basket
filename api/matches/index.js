@@ -10,6 +10,7 @@
 
 import { supabase } from '../_lib/supabase.js';
 import { cors } from '../_lib/cors.js';
+import { requireAuth } from '../_lib/auth.js';
 
 export default async function handler(req, res) {
   // Handle CORS
@@ -20,6 +21,12 @@ export default async function handler(req, res) {
   const { id } = req.query;
 
   try {
+    // Check authentication only for mutation methods
+    if (req.method !== 'GET') {
+      const user = await requireAuth(req, res);
+      if (!user) return; // Auth failed, response already sent
+    }
+
     if (req.method === 'GET') {
       if (id) {
         return await getMatch(req, res, id);

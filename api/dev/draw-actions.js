@@ -1,5 +1,6 @@
 import { supabase } from '../_lib/supabase.js';
 import { cors } from '../_lib/cors.js';
+import { requireAuth } from '../_lib/auth.js';
 
 /**
  * Dev Mode Draw Actions
@@ -9,17 +10,21 @@ import { cors } from '../_lib/cors.js';
 export default async function handler(req, res) {
   if (cors(req, res)) return;
 
-  const { action } = req.query;
-
-  // Only allow in development mode (skip check for now since we're always in dev)
-  // if (process.env.NODE_ENV === 'production') {
-  //   return res.status(403).json({
-  //     success: false,
-  //     message: 'Dev actions are not allowed in production'
-  //   });
-  // }
-
   try {
+    // Check authentication
+    const user = await requireAuth(req, res);
+    if (!user) return; // Auth failed, response already sent
+
+    const { action } = req.query;
+
+    // Only allow in development mode (skip check for now since we're always in dev)
+    // if (process.env.NODE_ENV === 'production') {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: 'Dev actions are not allowed in production'
+    //   });
+    // }
+
     if (req.method === 'POST') {
       if (action === 'draw-all') {
         return await drawAllCategories(req, res);

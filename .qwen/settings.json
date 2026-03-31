@@ -5,7 +5,14 @@
       "Bash(node *)",
       "Bash(curl *)",
       "Bash(pkill *)",
-      "Bash(mv *)"
+      "Bash(mv *)",
+      "Bash(bun *)",
+      "Bash(npm install *)",
+      "Bash(sleep *)",
+      "Bash(npm run *)",
+      "Bash(rm *)",
+      "Bash(pgrep *)",
+      "Bash(nohup *)"
     ]
   },
   "$version": 3

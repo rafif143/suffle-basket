@@ -4,3 +4,4 @@ export { default as Input } from './Input.svelte';
 export { default as Modal } from './Modal.svelte';
 export { default as NotificationModal } from './NotificationModal.svelte';
 export { default as LoadingSkeleton } from './LoadingSkeleton.svelte';
+export { default as PublicNavbar } from './PublicNavbar.svelte';

@@ -4,6 +4,7 @@
  */
 
 import { getMatchTime } from '$lib/utils/match.js';
+import { apiClient } from '$lib/api/client.js';
 
 export async function generateScheduleData() {
 	const loadedData = [];
@@ -19,9 +20,8 @@ export async function generateScheduleData() {
 	// Fetch draw results from database for each category
 	for (const cat of categories) {
 		try {
-			const response = await fetch(`/api/draw/${cat.key}/results`);
-			const result = await response.json();
-			if (result.success && result.data) {
+			const result = await apiClient.get(`/draw/${cat.key}/results`);
+			if (result && result.data) {
 				allMatchResults[cat.key] = result.data;
 			} else {
 				allMatchResults[cat.key] = Array(8).fill(null).map(() => ({ team1: 'TBD', team2: 'TBD' }));
@@ -35,10 +35,9 @@ export async function generateScheduleData() {
 	// Fetch scores for winner resolution
 	let matchScores = {};
 	try {
-		const scoresResponse = await fetch('/api/schedule?scores=true');
-		const scoresJson = await scoresResponse.json();
-		if (scoresJson.success) {
-			matchScores = scoresJson.data;
+		const result = await apiClient.get('/schedule?scores=true');
+		if (result && result.data) {
+			matchScores = result.data;
 		}
 	} catch (error) {
 		console.error('Failed to fetch scores for winner resolution:', error);

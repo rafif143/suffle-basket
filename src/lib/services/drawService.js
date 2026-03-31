@@ -66,5 +66,12 @@ export const drawService = {
 	async resetDraw(category) {
 		// Delete results by saving empty array
 		await apiClient.post(`/draw/${category}/results`, { results: [] });
+	},
+
+	/**
+	 * Execute dev mode actions (draw-all, delete-all)
+	 */
+	async devAction(action) {
+		return await apiClient.post(`/dev/draw-actions?action=${action}`, {});
 	}
 };

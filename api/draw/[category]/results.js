@@ -1,5 +1,6 @@
 import { supabase } from '../../_lib/supabase.js';
 import { cors } from '../../_lib/cors.js';
+import { requireAuth } from '../../_lib/auth.js';
 
 /**
  * Draw results by category
@@ -9,9 +10,23 @@ import { cors } from '../../_lib/cors.js';
 export default async function handler(req, res) {
   if (cors(req, res)) return;
 
-  const { category } = req.query;
-
   try {
+    // Check authentication only for mutation methods
+    if (req.method !== 'GET') {
+      const user = await requireAuth(req, res);
+      if (!user) return; // Auth failed, response already sent
+    }
+
+    // Get category from URL params (route is /api/draw/:category/results)
+    const category = req.params?.category || req.query?.category;
+
+    if (!category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category is required'
+      });
+    }
+
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('draw_results')

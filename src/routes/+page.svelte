@@ -1,21 +1,29 @@
 <script>
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { auth } from '$lib/stores/auth.js';
+	import { auth } from '$lib/stores/auth.svelte.js';
 
 	onMount(() => {
-		const unsubscribe = auth.subscribe(($auth) => {
-			if (!$auth.loading) {
-				if ($auth.isAuthenticated) {
-					goto('/draw', { replaceState: true });
-				} else {
-					goto('/live-scores', { replaceState: true });
-				}
+		if (!auth.loading) {
+			if (auth.isAuthenticated) {
+				goto('/draw', { replaceState: true });
+			} else {
+				goto('/live-scores', { replaceState: true });
 			}
-		});
-
-		auth.checkAuth();
-		return unsubscribe;
+		} else {
+			// Wait for auth to finish loading
+			const checkAuth = setInterval(() => {
+				if (!auth.loading) {
+					clearInterval(checkAuth);
+					if (auth.isAuthenticated) {
+						goto('/draw', { replaceState: true });
+					} else {
+						goto('/live-scores', { replaceState: true });
+					}
+				}
+			}, 100);
+			return () => clearInterval(checkAuth);
+		}
 	});
 </script>
 

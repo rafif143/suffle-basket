@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { auth } from '$lib/stores/auth.js';
+	import { auth } from '$lib/stores/auth.svelte.js';
 	
 	let isSidebarOpen = true;
 	
@@ -18,23 +18,22 @@
 	let authState = { isAuthenticated: false, user: null, loading: true };
 
 	// Check if current route is public (no auth required, no sidebar)
-	$: isPublicRoute = $page.url.pathname === '/login' || 
-					  $page.url.pathname === '/register' || 
+	$: isPublicRoute = $page.url.pathname === '/login' ||
 					  $page.url.pathname === '/live-scores' ||
-					  $page.url.pathname === '/registration';
+					  $page.url.pathname === '/registration' ||
+					  $page.url.pathname === '/schedule' ||
+					  $page.url.pathname === '/draw';
+
+	// For public routes, don't show loading state
+	$: showLoading = auth.loading && !isPublicRoute;
 
 	onMount(() => {
-		const unsubscribe = auth.subscribe(($auth) => {
-			authState = $auth;
-			
-			// Only redirect if not loading and not authenticated and not on public route
-			if (!$auth.loading && !$auth.isAuthenticated && !isPublicRoute) {
-				goto('/login');
-			}
-		});
+		// Only redirect if not loading and not authenticated and not on public route
+		if (!auth.loading && !auth.isAuthenticated && !isPublicRoute) {
+			goto('/login');
+		}
 
 		auth.checkAuth();
-		return unsubscribe;
 	});
 
 	function handleLogout() {
@@ -46,7 +45,7 @@
 {#if isPublicRoute}
 	<!-- Public routes (login, live-scores) - no sidebar -->
 	<slot />
-{:else if authState.loading}
+{:else if showLoading}
 	<!-- Loading state -->
 	<div class="min-h-screen bg-neutral-50 flex items-center justify-center">
 		<div class="text-center">
@@ -54,7 +53,7 @@
 			<p class="text-neutral-600 font-poppins">Loading...</p>
 		</div>
 	</div>
-{:else if authState.isAuthenticated}
+{:else if auth.isAuthenticated}
 	<!-- Protected routes - with sidebar -->
 	<div class="flex h-screen overflow-hidden bg-neutral-50">
 		<!-- Sidebar -->
@@ -114,11 +113,11 @@
 				<div class="px-4 py-4 border-t border-white/5">
 					<div class="flex items-center gap-3 mb-3">
 						<div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-							<span class="text-white font-montserrat font-bold text-sm">{authState.user?.username?.charAt(0).toUpperCase()}</span>
+							<span class="text-white font-montserrat font-bold text-sm">{auth.user?.username?.charAt(0).toUpperCase()}</span>
 						</div>
 						<div class="flex-1 overflow-hidden">
-							<p class="text-white font-poppins font-semibold text-sm truncate">{authState.user?.username}</p>
-							<p class="text-white/40 text-xs capitalize">{authState.user?.role}</p>
+							<p class="text-white font-poppins font-semibold text-sm truncate">{auth.user?.username}</p>
+							<p class="text-white/40 text-xs capitalize">{auth.user?.role}</p>
 						</div>
 					</div>
 					<button 

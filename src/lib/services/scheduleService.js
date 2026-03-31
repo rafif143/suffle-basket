@@ -44,6 +44,14 @@ export const scheduleService = {
 	},
 
 	/**
+	 * Get all schedule data
+	 */
+	async getSchedule() {
+		const response = await apiClient.get('/schedule');
+		return response.data;
+	},
+
+	/**
 	 * Save match score
 	 */
 	async saveScore(matchKey, score1, score2) {

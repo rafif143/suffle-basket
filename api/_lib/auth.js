@@ -1,46 +1,64 @@
-import jwt from 'jsonwebtoken';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 /**
- * Authentication middleware
+ * Authentication middleware using Supabase Auth
  */
-export function requireAuth(req, res) {
-  const authHeader = req.headers.authorization;
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({
-      success: false,
-      message: 'Authentication required'
-    });
-    return null;
-  }
-
-  const token = authHeader.substring(7);
-
+export async function requireAuth(req, res) {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'yadika-cup-secret-key-2025');
-    return decoded;
+    // Get token from Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({
+        success: false,
+        message: 'No token provided'
+      });
+      return null;
+    }
+
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+    // Create client with user's token
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid or expired token'
+      });
+      return null;
+    }
+
+    return user;
   } catch (error) {
     res.status(401).json({
       success: false,
-      message: 'Invalid or expired token'
+      message: 'Authentication failed'
     });
     return null;
   }
 }
 
 /**
- * Check if endpoint should be public
+ * Check if endpoint should be public (no auth required)
  */
 export function isPublicEndpoint(req) {
+  // Only these endpoints are public
   const publicEndpoints = [
     '/api/health',
-    '/api/auth',
-    '/api/schedule', // Live scores - public
-    '/api/live-scores'      // Dedicated public endpoint
   ];
 
-  // Allow GET requests to schedule (read-only)
-  if (req.url.startsWith('/api/schedule') && req.method === 'GET') {
+  // Auth endpoint is only public for POST (login)
+  if (req.url?.startsWith('/api/auth') && req.method === 'POST') {
     return true;
   }
 

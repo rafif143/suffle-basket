@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { settingsService, registrationService } from '$lib/services';
-	import { NotificationModal } from '$lib/components/ui';
+	import { NotificationModal, PublicNavbar } from '$lib/components/ui';
 	import { PlayerRow } from '$lib/components/features/RegistrationPage';
 
 	let schoolName = $state('');
@@ -54,7 +54,7 @@
 	});
 
 	function addPlayer() {
-		if (players.length < 10) players = [...players, { name: '', card: null }];
+		if (players.length < 12) players = [...players, { name: '', card: null }];
 	}
 
 	function removePlayer(index) {
@@ -148,6 +148,7 @@
 </svelte:head>
 
 <div class="min-h-screen bg-linear-to-br from-[#0f1123] via-[#1a1d35] to-[#0f1123] flex flex-col">
+	<PublicNavbar />
 	<!-- Hero Header -->
 	<header class="relative overflow-hidden">
 		<!-- Background decoration -->
@@ -283,11 +284,11 @@
 					<div class="w-9 h-9 bg-linear-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center font-montserrat text-sm font-black text-white shadow-lg shadow-indigo-200 flex-shrink-0">02</div>
 					<div class="flex-1">
 						<h2 class="font-montserrat text-base font-extrabold text-neutral-900">Players & Officials</h2>
-						<p class="text-xs text-neutral-400 mt-0.5">Min 5 · Max 10 players. Upload each player's student ID card (max 2MB).</p>
+						<p class="text-xs text-neutral-400 mt-0.5">Min 5 · Max 12 players. Upload each player's student ID card (max 2MB).</p>
 					</div>
 					<div class="flex items-baseline gap-0.5">
 						<span class="font-montserrat text-2xl font-black text-indigo-600">{players.length}</span>
-						<span class="text-sm font-semibold text-neutral-400">/10</span>
+						<span class="text-sm font-semibold text-neutral-400">/12</span>
 					</div>
 				</div>
 
@@ -310,7 +311,7 @@
 						/>
 					{/each}
 
-					{#if players.length < 10}
+					{#if players.length < 12}
 						<button type="button" onclick={addPlayer} class="w-full py-2.5 border-2 border-dashed border-neutral-300 rounded-xl bg-transparent font-poppins text-sm font-semibold text-neutral-400 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all flex items-center justify-center gap-2">
 							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
 							Add Player

@@ -1,5 +1,6 @@
 import { supabase } from '../_lib/supabase.js';
 import { cors } from '../_lib/cors.js';
+import { scoreSchema } from '../../src/lib/validators/schemas.js';
 
 /**
  * Schedule API
@@ -68,14 +69,14 @@ export default async function handler(req, res) {
 
   const { scores, matchKey } = req.query;
 
-  // Check authentication for non-GET requests
-  if (req.method !== 'GET') {
-    const { requireAuth } = await import('../_lib/auth.js');
-    const user = requireAuth(req, res);
-    if (!user) return;
-  }
-
   try {
+    // Check authentication only for mutation methods (POST, DELETE) or when specific actions are requested
+    if (req.method !== 'GET' || req.query.action) {
+      const { requireAuth } = await import('../_lib/auth.js');
+      const user = await requireAuth(req, res);
+      if (!user) return; // Auth failed, response already sent
+    }
+
     if (req.method === 'GET') {
       // Get all scores
       if (scores === 'true') {
@@ -125,6 +126,7 @@ export default async function handler(req, res) {
           }
         });
       }
+
       // Get all draw results
       const { data: drawResults, error } = await supabase
         .from('draw_results')
@@ -154,17 +156,31 @@ export default async function handler(req, res) {
       if (!matches || matches.length === 0) {
         const initialMatches = [];
 
-        // Time slots helper
-        const getMatchTime = (indexInDay) => {
-          const times = [
-            '15:00 - 16:00',
-            '16:00 - 17:00', 
-            '17:00 - 18:00',
-            '18:00 - 19:00',
-            '19:00 - 20:00',
-            '20:00 - 21:00'
-          ];
-          return times[indexInDay % times.length];
+        // Match counts per day (for time slot calculation)
+        const matchesPerDayCount = {
+          1: 5, 2: 5, 3: 5, 4: 5,  // Days 1-4: 5 matches each (start 15:00)
+          5: 6, 6: 6,              // Days 5-6: 6 matches each (start 14:00)
+          7: 4, 8: 4, 9: 4, 10: 4, // Days 7-10: 4 matches each (start 15:00)
+          11: 4, 12: 4, 13: 4      // Days 11-13: 4 matches each (start 15:00)
+        };
+
+        // Time slots helper - different start times based on match count per day
+        // 6 matches/day: 14:00, 15:00, 16:00, (break), 18:00, 19:00, 20:00
+        // <6 matches/day: 15:00, 16:00, (break), 18:00, 19:00, 20:00
+        const getMatchTime = (day, indexInDay) => {
+          const totalInDay = matchesPerDayCount[day] || 5;
+          // If 6 matches: start at 14:00, else start at 15:00
+          const startHour = totalInDay >= 6 ? 14 : 15;
+          
+          // Time slots with 1 hour break after match 3 (index 2)
+          const times = [];
+          for (let i = 0; i < totalInDay; i++) {
+            let hour = startHour + i;
+            // Add 1 hour break after match 3 (index 2)
+            if (i >= 3) hour += 1;
+            times.push(`${hour.toString().padStart(2, '0')}:00 - ${(hour + 1).toString().padStart(2, '0')}:00`);
+          }
+          return times[indexInDay];
         };
 
         // Fetch draw results for Round of 16 (16 Besar)
@@ -184,12 +200,13 @@ export default async function handler(req, res) {
         };
 
         const createMatch = (day, matchNum, round, level, gender, category, team1 = 'TBD', team2 = 'TBD', t1From = null, t2From = null) => {
+          const dayMatches = initialMatches.filter(m => m.day === day);
           initialMatches.push({
             category,
             round,
             match_number: matchNum,
             day,
-            match_time: getMatchTime(initialMatches.filter(m => m.day === day).length),
+            match_time: getMatchTime(day, dayMatches.length),
             team1: team1 === '?' ? 'TBD' : team1,
             team2: team2 === '?' ? 'TBD' : team2,
             team1_from: t1From,
@@ -387,24 +404,26 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       // Handle refresh-winners action
       if (req.query.action === 'refresh-winners') {
-        // This endpoint triggers a re-calculation of all winners
-        // The actual logic happens in the GET endpoint, but this signals
-        // that the client should refetch the schedule
         return res.status(200).json({
           success: true,
           message: 'Winner refresh triggered. Refetch schedule to see updates.'
         });
       }
 
-      const { matchKey: bodyMatchKey, score1, score2 } = req.body;
-
-      // Validate matchKey format
-      if (!bodyMatchKey) {
+      // Validate score input
+      const validation = scoreSchema.safeParse(req.body);
+      if (!validation.success) {
         return res.status(400).json({
           success: false,
-          message: 'matchKey is required'
+          message: 'Validation error',
+          errors: validation.error.errors.map(err => ({
+            field: err.path.join('.'),
+            message: err.message
+          }))
         });
       }
+
+      const { matchKey: bodyMatchKey, score1, score2 } = validation.data;
 
       const { data, error } = await supabase
         .from('match_scores')

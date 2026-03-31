@@ -1,6 +1,4 @@
 <script>
-	import { getMatchDay, getMatchTime, getMatchIndexInDay } from '$lib/utils/match.js';
-	
 	let {
 		match,
 		index,
@@ -10,9 +8,12 @@
 		score = null,
 		onInputScore
 	} = $props();
-	
-	let day = $derived(getMatchDay(level, gender, index));
-	let time = $derived(getMatchTime(day, getMatchIndexInDay(level, gender, index)));
+
+	// Use actual match data instead of hardcoded calculations
+	let day = $derived(match.day);
+	let time = $derived(match.time);
+	let round = $derived(match.round || '16 Besar');
+	let matchStrId = $derived(match.matchStrId || `M${String(index + 1).padStart(2, '0')}`);
 </script>
 
 <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-neutral-200/50 shadow-sm overflow-hidden hover:shadow-md transition-shadow {isComplete ? 'ring-2 ring-green-500/50' : ''}">
@@ -20,7 +21,7 @@
 	<div class="bg-linear-to-r from-indigo-50 to-white px-4 py-3 border-b border-neutral-100">
 		<div class="flex items-center justify-between mb-2">
 			<div class="flex items-center gap-2">
-				<span class="font-montserrat font-bold text-base text-indigo-600">MATCH {String(index + 1).padStart(2, '0')}</span>
+				<span class="font-montserrat font-bold text-base text-indigo-600">MATCH {matchStrId}</span>
 				{#if isComplete}
 					<span class="bg-green-100 text-green-700 border border-green-200 text-[10px] px-2 py-0.5 rounded font-poppins font-semibold flex items-center gap-1">
 						<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -28,7 +29,7 @@
 					</span>
 				{/if}
 			</div>
-			<span class="text-xs font-poppins font-medium text-neutral-400">Round of 16</span>
+			<span class="text-xs font-poppins font-medium text-neutral-400">{round}</span>
 		</div>
 		<div class="flex items-center gap-2 flex-wrap">
 			<div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-md border border-neutral-200">

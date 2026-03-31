@@ -8,9 +8,23 @@
 	} = $props();
 
 	const isTBD = (team) => team === 'TBD' || team?.includes('Winner');
-	
+
 	// Check if match is waiting for previous round
 	const isWaitingForPrevious = !isReadyToPlay && !isComplete;
+	
+	// Determine winner/loser when match is complete
+	let winner = $derived(null);
+	let loser = $derived(null);
+	
+	if (isComplete && score) {
+		if (score.score1 > score.score2) {
+			winner = 'team1';
+			loser = 'team2';
+		} else if (score.score2 > score.score1) {
+			winner = 'team2';
+			loser = 'team1';
+		}
+	}
 </script>
 
 <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-neutral-200/50 shadow-sm overflow-hidden hover:shadow-md transition-all {isComplete ? 'ring-2 ring-green-500/50 bg-green-50/30' : ''}">
@@ -72,53 +86,79 @@
 			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white border-2 border-neutral-200 rounded-full flex items-center justify-center text-[10px] font-montserrat font-black text-neutral-400 z-10 shadow-sm">VS</div>
 
 			<!-- Team 1 (Home) -->
-			<div class="flex items-center gap-2.5 rounded-lg border-2 border-indigo-200 bg-indigo-50 p-3 hover:shadow-sm transition-shadow">
+			<div class="flex items-center gap-2.5 rounded-lg border-2 p-3 transition-shadow {winner === 'team1' ? 'border-green-400 bg-green-50 shadow-md ring-2 ring-green-300' : isTBD(match.team1) ? 'border-indigo-200 bg-indigo-50' : 'border-indigo-200 bg-indigo-50 hover:shadow-sm'}">
 				<div class="flex-1 min-w-0">
-					<div class="text-[9px] font-poppins font-semibold text-indigo-600 mb-0.5 uppercase tracking-wide">Home</div>
-					<div class="text-sm font-poppins font-semibold {isTBD(match.team1) ? 'text-neutral-300 italic' : 'text-neutral-900'} truncate">{match.team1}</div>
+					<div class="flex items-center gap-1 mb-0.5">
+						{#if winner === 'team1'}
+							<span class="text-[8px] font-poppins font-bold text-green-700 uppercase tracking-wide flex items-center gap-0.5">
+								<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-green-600"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+								Winner
+							</span>
+						{:else}
+							<div class="text-[9px] font-poppins font-semibold text-indigo-600 uppercase tracking-wide">Home</div>
+						{/if}
+					</div>
+					<div class="text-sm font-poppins font-semibold {isTBD(match.team1) ? 'text-neutral-300 italic' : winner === 'team1' ? 'text-green-900 font-bold' : 'text-neutral-900'} truncate">{match.team1}</div>
+					{#if loser === 'team1' && isComplete}
+						<div class="text-[8px] font-poppins font-medium text-red-600 mt-0.5">Eliminated</div>
+					{/if}
 				</div>
 				{#if isComplete && score}
-					<div class="text-2xl font-montserrat font-black text-indigo-600">{score.score1}</div>
+					<div class="text-2xl font-montserrat font-black {winner === 'team1' ? 'text-green-600' : 'text-neutral-600'}">{score.score1}</div>
 				{/if}
 			</div>
 
 			<!-- Team 2 (Away) -->
-			<div class="flex items-center gap-2.5 rounded-lg border-2 border-neutral-200 bg-neutral-50 p-3 hover:shadow-sm transition-shadow">
+			<div class="flex items-center gap-2.5 rounded-lg border-2 p-3 transition-shadow {winner === 'team2' ? 'border-green-400 bg-green-50 shadow-md ring-2 ring-green-300' : isTBD(match.team2) ? 'border-neutral-200 bg-neutral-50' : 'border-neutral-200 bg-neutral-50 hover:shadow-sm'}">
 				<div class="flex-1 min-w-0">
-					<div class="text-[9px] font-poppins font-semibold text-neutral-500 mb-0.5 uppercase tracking-wide">Away</div>
-					<div class="text-sm font-poppins font-semibold {isTBD(match.team2) ? 'text-neutral-300 italic' : 'text-neutral-900'} truncate">{match.team2}</div>
+					<div class="flex items-center gap-1 mb-0.5">
+						{#if winner === 'team2'}
+							<span class="text-[8px] font-poppins font-bold text-green-700 uppercase tracking-wide flex items-center gap-0.5">
+								<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" class="text-green-600"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+								Winner
+							</span>
+						{:else}
+							<div class="text-[9px] font-poppins font-semibold text-neutral-500 uppercase tracking-wide">Away</div>
+						{/if}
+					</div>
+					<div class="text-sm font-poppins font-semibold {isTBD(match.team2) ? 'text-neutral-300 italic' : winner === 'team2' ? 'text-green-900 font-bold' : 'text-neutral-900'} truncate">{match.team2}</div>
+					{#if loser === 'team2' && isComplete}
+						<div class="text-[8px] font-poppins font-medium text-red-600 mt-0.5">Eliminated</div>
+					{/if}
 				</div>
 				{#if isComplete && score}
-					<div class="text-2xl font-montserrat font-black text-neutral-600">{score.score2}</div>
+					<div class="text-2xl font-montserrat font-black {winner === 'team2' ? 'text-green-600' : 'text-neutral-600'}">{score.score2}</div>
 				{/if}
 			</div>
 		{/if}
 	</div>
 	
 	<!-- Action Button -->
-	<div class="px-4 pb-4">
-		{#if isWaitingForPrevious}
-			<button
-				disabled
-				class="w-full py-2.5 rounded-lg font-poppins font-semibold text-sm bg-neutral-100 text-neutral-400 border-2 border-neutral-200 cursor-not-allowed flex items-center justify-center gap-2"
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="12" y1="12" x2="16" y2="12"/></svg>
-				Waiting for Results
-			</button>
-		{:else}
-			<button
-				onclick={onInputScore}
-				class="w-full py-2.5 rounded-lg font-poppins font-semibold text-sm transition-all flex items-center justify-center gap-2 {isComplete ? 'bg-green-50 text-green-700 border-2 border-green-200 hover:bg-green-100' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'}"
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					{#if isComplete}
-						<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-					{:else}
-						<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-					{/if}
-				</svg>
-				{isComplete ? 'Edit Score' : 'Input Score'}
-			</button>
-		{/if}
-	</div>
+	{#if onInputScore}
+		<div class="px-4 pb-4">
+			{#if isWaitingForPrevious}
+				<button
+					disabled
+					class="w-full py-2.5 rounded-lg font-poppins font-semibold text-sm bg-neutral-100 text-neutral-400 border-2 border-neutral-200 cursor-not-allowed flex items-center justify-center gap-2"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="12" y1="12" x2="16" y2="12"/></svg>
+					Waiting for Results
+				</button>
+			{:else}
+				<button
+					onclick={onInputScore}
+					class="w-full py-2.5 rounded-lg font-poppins font-semibold text-sm transition-all flex items-center justify-center gap-2 {isComplete ? 'bg-green-50 text-green-700 border-2 border-green-200 hover:bg-green-100' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'}"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						{#if isComplete}
+							<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+						{:else}
+							<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+						{/if}
+					</svg>
+					{isComplete ? 'Edit Score' : 'Input Score'}
+				</button>
+			{/if}
+		</div>
+	{/if}
 </div>

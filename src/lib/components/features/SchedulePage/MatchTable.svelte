@@ -19,7 +19,9 @@
 					<th class="px-4 py-3 text-center text-xs font-montserrat font-bold text-neutral-700 uppercase">Score</th>
 					<th class="px-4 py-3 text-left text-xs font-montserrat font-bold text-neutral-700 uppercase">Away Team</th>
 					<th class="px-4 py-3 text-center text-xs font-montserrat font-bold text-neutral-700 uppercase">Status</th>
-					<th class="px-4 py-3 text-center text-xs font-montserrat font-bold text-neutral-700 uppercase">Action</th>
+					{#if onOpenScoreModal}
+						<th class="px-4 py-3 text-center text-xs font-montserrat font-bold text-neutral-700 uppercase">Action</th>
+					{/if}
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-neutral-100">
@@ -69,11 +71,13 @@
 								<span class="text-neutral-400 text-xs font-poppins">Not Play Yet</span>
 							{/if}
 						</td>
-						<td class="px-4 py-4 text-center">
-							<button onclick={() => onOpenScoreModal(match)} class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-poppins font-medium text-xs rounded-lg transition-colors">
-								{matchComplete ? 'Edit' : 'Input'}
-							</button>
-						</td>
+						{#if onOpenScoreModal}
+							<td class="px-4 py-4 text-center">
+								<button onclick={() => onOpenScoreModal(match)} class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-poppins font-medium text-xs rounded-lg transition-colors">
+									{matchComplete ? 'Edit' : 'Input'}
+								</button>
+							</td>
+						{/if}
 					</tr>
 				{/each}
 			</tbody>

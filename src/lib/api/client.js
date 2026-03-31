@@ -40,7 +40,11 @@ export const apiClient = {
         },
       });
 
-      const data = await response.json();
+      let data = {};
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      }
 
       if (!response.ok) {
         // Handle auth errors
@@ -49,7 +53,7 @@ export const apiClient = {
           window.location.href = '/login';
           return;
         }
-        throw new Error(data.message || 'API request failed');
+        throw new Error(data.message || data.error || `API request failed with status ${response.status}`);
       }
 
       // Cache successful GET requests

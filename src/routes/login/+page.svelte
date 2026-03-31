@@ -1,54 +1,35 @@
 <script>
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { auth } from '$lib/stores/auth.js';
-	
-	let username = '';
-	let password = '';
-	let loading = false;
-	let error = '';
-	let showPassword = false;
+	import { page } from '$app/stores';
+	import { auth } from '$lib/stores/auth.svelte.js';
+
+	let email = $state('');
+	let password = $state('');
+	let error = $state('');
+	let loading = $state(false);
+	let showPassword = $state(false);
 
 	// Redirect if already authenticated
-	onMount(() => {
-		const unsubscribe = auth.subscribe(($auth) => {
-			// Only redirect if fully loaded and authenticated
-			if (!$auth.loading && $auth.isAuthenticated) {
-				goto('/draw');
-			}
-		});
-		
-		// Check auth but don't force redirect
-		auth.checkAuth();
-		return unsubscribe;
+	$effect(() => {
+		if (!auth.loading && auth.isAuthenticated) {
+			const redirect = $page.url.searchParams.get('redirect') || '/schedule';
+			goto(redirect);
+		}
 	});
 
-	async function handleLogin(e) {
+	async function handleSubmit(e) {
 		e.preventDefault();
-		loading = true;
 		error = '';
+		loading = true;
 
-		try {
-			const result = await auth.login(username, password);
-			
-			if (result.success) {
-				goto('/draw');
-			} else {
-				// More specific error messages
-				if (result.message.includes('Invalid credentials') || result.message.includes('User not found')) {
-					error = 'Username atau password salah. Silakan cek kembali.';
-				} else if (result.message.includes('network') || result.message.includes('fetch')) {
-					error = 'Server tidak dapat diakses. Pastikan koneksi internet stabil.';
-				} else {
-					error = result.message || 'Login gagal. Silakan coba lagi.';
-				}
-			}
-		} catch (err) {
-			console.error('Login error:', err);
-			error = 'Server tidak dapat diakses. Pastikan backend berjalan dan koneksi internet stabil.';
+		const result = await auth.login(email, password);
+
+		if (result.success) {
+			// Redirect handled by auth state effect
+		} else {
+			error = result.message;
+			loading = false;
 		}
-		
-		loading = false;
 	}
 </script>
 
@@ -56,119 +37,89 @@
 	<title>Login | Yadika Cup</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-6">
+<div class="min-h-screen bg-linear-to-br from-[#0f1123] via-[#1a1d35] to-[#0f1123] flex items-center justify-center p-6">
 	<div class="w-full max-w-md">
-		<!-- Logo & Title -->
+		<!-- Logo/Brand -->
 		<div class="text-center mb-8">
-			<div class="w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-indigo-200">
-				<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-					<rect width="12" height="12" x="2" y="10" rx="2" ry="2"/>
-					<path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/>
-					<path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/>
-				</svg>
+			<div class="inline-flex items-center gap-2 mb-4">
+				<div class="w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+						<rect width="12" height="12" x="2" y="10" rx="2" ry="2"/>
+						<path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/>
+						<path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/>
+					</svg>
+				</div>
 			</div>
-			<h1 class="font-montserrat text-3xl font-black text-neutral-900 mb-2">Yadika Cup</h1>
-			<p class="text-neutral-500 font-poppins">Tournament Management System</p>
+			<h1 class="font-montserrat text-3xl font-black text-white mb-2">Welcome Back</h1>
+			<p class="text-white/60 font-poppins text-sm">Sign in to your Yadika Cup account</p>
 		</div>
 
 		<!-- Login Form -->
-		<div class="bg-white rounded-3xl border border-neutral-200 p-8 shadow-xl shadow-neutral-100">
-			<div class="mb-6">
-				<h2 class="font-montserrat text-xl font-extrabold text-neutral-900 mb-1">Welcome Back</h2>
-				<p class="text-sm text-neutral-500">Sign in to access tournament management</p>
-			</div>
+		<div class="bg-white/10 backdrop-blur-lg rounded-3xl border border-white/15 p-8 shadow-2xl">
+			<form onsubmit={handleSubmit} class="space-y-5">
+				{#if error}
+					<div class="bg-red-500/20 border-2 border-red-500/50 rounded-xl p-4 flex items-start gap-3">
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-400 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+						<p class="text-red-200 text-sm font-poppins">{error}</p>
+					</div>
+				{/if}
 
-			{#if error}
-				<div class="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
-					<p class="text-sm font-poppins font-semibold text-red-700">{error}</p>
-				</div>
-			{/if}
-
-			<form onsubmit={handleLogin} class="space-y-4">
 				<div>
-					<label for="username" class="block text-sm font-poppins font-semibold text-neutral-700 mb-2">Username</label>
-					<input 
-						id="username"
-						type="text" 
-						bind:value={username}
+					<label for="email" class="block text-sm font-poppins font-semibold text-white/80 mb-2">Email</label>
+					<input
+						id="email"
+						type="email"
+						bind:value={email}
 						required
-						disabled={loading}
-						placeholder="Enter your username"
-						class="w-full px-4 py-3 bg-neutral-50 border-2 border-neutral-200 rounded-xl font-poppins text-sm font-medium text-neutral-900 placeholder:text-neutral-400 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:bg-white disabled:opacity-50"
+						placeholder="your@email.com"
+						class="w-full px-4 py-3 bg-white/5 border-2 border-white/10 rounded-xl font-poppins text-sm font-medium text-white placeholder:text-white/30 outline-none transition-all focus:border-indigo-500 focus:bg-white/10 focus:ring-2 focus:ring-indigo-500/20"
 					/>
 				</div>
 
 				<div>
-					<label for="password" class="block text-sm font-poppins font-semibold text-neutral-700 mb-2">Password</label>
+					<label for="password" class="block text-sm font-poppins font-semibold text-white/80 mb-2">Password</label>
 					<div class="relative">
-						<input 
+						<input
 							id="password"
 							type={showPassword ? 'text' : 'password'}
 							bind:value={password}
 							required
-							disabled={loading}
 							placeholder="Enter your password"
-							class="w-full px-4 py-3 pr-12 bg-neutral-50 border-2 border-neutral-200 rounded-xl font-poppins text-sm font-medium text-neutral-900 placeholder:text-neutral-400 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:bg-white disabled:opacity-50"
+							class="w-full px-4 py-3 bg-white/5 border-2 border-white/10 rounded-xl font-poppins text-sm font-medium text-white placeholder:text-white/30 outline-none transition-all focus:border-indigo-500 focus:bg-white/10 focus:ring-2 focus:ring-indigo-500/20"
 						/>
 						<button
 							type="button"
 							onclick={() => showPassword = !showPassword}
-							class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600 transition-colors"
-							disabled={loading}
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
 						>
 							{#if showPassword}
-								<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-									<line x1="1" y1="1" x2="23" y2="23"/>
-								</svg>
+								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
 							{:else}
-								<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-									<circle cx="12" cy="12" r="3"/>
-								</svg>
+								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
 							{/if}
 						</button>
 					</div>
 				</div>
 
-				<button 
-					type="submit" 
-					disabled={loading || !username || !password}
-					class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-poppins font-bold text-sm rounded-xl transition-all shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+				<button
+					type="submit"
+					disabled={loading || !email || !password}
+					class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-poppins font-bold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/30 hover:shadow-xl hover:shadow-indigo-600/40 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
 				>
 					{#if loading}
-						<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
-							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-						</svg>
+						<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
 						Signing in...
 					{:else}
-						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-							<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-							<polyline points="10 17 15 12 10 7"/>
-							<line x1="15" x2="3" y1="12" y2="12"/>
-						</svg>
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
 						Sign In
 					{/if}
 				</button>
 			</form>
-
 		</div>
 
-		<!-- Registration Link -->
-		<div class="text-center mt-6">
-			<p class="text-sm text-neutral-500 mb-2">Don't have an account?</p>
-			<a href="/register" class="text-indigo-600 hover:text-indigo-700 font-poppins font-semibold text-sm transition-colors">
-				Create Account →
-			</a>
-		</div>
-
-		<!-- Public Access -->
-		<div class="text-center mt-4">
-			<p class="text-sm text-neutral-500 mb-2">Looking for live scores?</p>
-			<a href="/live-scores" class="text-indigo-600 hover:text-indigo-700 font-poppins font-semibold text-sm transition-colors">
-				View Live Scores →
-			</a>
-		</div>
+		<!-- Footer -->
+		<p class="text-center text-white/40 text-xs mt-8 font-poppins">
+			© 2026 Yadika Cup Basketball Championship
+		</p>
 	</div>
 </div>

@@ -16,10 +16,17 @@ export default async function handler(req, res) {
 
   const { id, stats } = req.query;
 
-  // Check if authentication is required
-  if (!isPublicEndpoint(req)) {
-    const user = requireAuth(req, res);
-    if (!user) return; // Auth failed, response already sent
+  // Auth policy:
+  // 1. GET all registrations -> PROTECTED
+  // 2. GET by ID / stats -> PUBLIC
+  // 3. POST (create new) -> PUBLIC (for public registration page)
+  // 4. PATCH/DELETE -> PROTECTED
+  const isProtectedMethod = ['PATCH', 'DELETE'].includes(req.method);
+  const isProtectedListing = req.method === 'GET' && !id && !stats;
+  
+  if (isProtectedMethod || isProtectedListing) {
+    const user = await requireAuth(req, res);
+    if (!user) return; // Auth failed
   }
 
   try {

@@ -1,5 +1,6 @@
 import { supabase } from './_lib/supabase.js';
 import { cors } from './_lib/cors.js';
+import { requireAuth } from './_lib/auth.js';
 
 /**
  * Tournament settings
@@ -10,6 +11,13 @@ export default async function handler(req, res) {
   if (cors(req, res)) return;
 
   try {
+    // Check if authentication is required (only for mutations)
+    const isMutation = ['POST', 'PATCH', 'DELETE'].includes(req.method);
+    if (isMutation) {
+      const user = await requireAuth(req, res);
+      if (!user) return; // Auth failed, response already sent
+    }
+
     if (req.method === 'GET') {
       const { data, error } = await supabase
         .from('settings')
