@@ -28,11 +28,12 @@
 			
 			<div class="p-6 space-y-4">
 				<div class="space-y-2">
-					<label class="flex items-center gap-2 text-sm font-poppins font-semibold text-neutral-700">
+					<label for="score1" class="flex items-center gap-2 text-sm font-poppins font-semibold text-neutral-700">
 						<div class="w-1 h-4 rounded-full bg-indigo-600"></div>
 						{match.team1}
 					</label>
 					<input 
+						id="score1"
 						type="number" 
 						bind:value={score1}
 						min="0"
@@ -48,11 +49,12 @@
 				</div>
 				
 				<div class="space-y-2">
-					<label class="flex items-center gap-2 text-sm font-poppins font-semibold text-neutral-700">
+					<label for="score2" class="flex items-center gap-2 text-sm font-poppins font-semibold text-neutral-700">
 						<div class="w-1 h-4 rounded-full bg-red-500"></div>
 						{match.team2}
 					</label>
 					<input 
+						id="score2"
 						type="number" 
 						bind:value={score2}
 						min="0"

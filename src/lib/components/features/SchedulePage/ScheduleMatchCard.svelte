@@ -10,21 +10,24 @@
 	const isTBD = (team) => team === 'TBD' || team?.includes('Winner');
 
 	// Check if match is waiting for previous round
-	const isWaitingForPrevious = !isReadyToPlay && !isComplete;
+	let isWaitingForPrevious = $derived(!isReadyToPlay && !isComplete);
 	
 	// Determine winner/loser when match is complete
-	let winner = $derived(null);
-	let loser = $derived(null);
-	
-	if (isComplete && score) {
-		if (score.score1 > score.score2) {
-			winner = 'team1';
-			loser = 'team2';
-		} else if (score.score2 > score.score1) {
-			winner = 'team2';
-			loser = 'team1';
+	let winner = $derived.by(() => {
+		if (isComplete && score) {
+			if (score.score1 > score.score2) return 'team1';
+			if (score.score2 > score.score1) return 'team2';
 		}
-	}
+		return null;
+	});
+
+	let loser = $derived.by(() => {
+		if (isComplete && score) {
+			if (score.score1 > score.score2) return 'team2';
+			if (score.score2 > score.score1) return 'team1';
+		}
+		return null;
+	});
 </script>
 
 <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-neutral-200/50 shadow-sm overflow-hidden hover:shadow-md transition-all {isComplete ? 'ring-2 ring-green-500/50 bg-green-50/30' : ''}">

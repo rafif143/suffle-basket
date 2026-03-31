@@ -83,7 +83,7 @@ export const teamRegistrationSchema = z.object({
         .nullable()
     }))
     .min(5, 'Minimum 5 players required')
-    .max(10, 'Maximum 10 players allowed'),
+    .max(12, 'Maximum 12 players allowed'),
   officials: z
     .array(z.string())
     .min(2, 'Minimum 2 officials required')

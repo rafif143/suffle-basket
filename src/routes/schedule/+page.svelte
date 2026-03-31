@@ -261,7 +261,7 @@
 									</div>
 								</button>
 							</div>
-							<div class="fixed inset-0 z-40" onclick={closeExportMenu}></div>
+							<button class="fixed inset-0 z-40" onclick={closeExportMenu} aria-label="Close export menu"></button>
 						{/if}
 					</div>
 					<div class="flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-neutral-100 p-1">
