@@ -1,0 +1,828 @@
+{
+  "tables": [
+    {
+      "table_name": "registrations"
+    },
+    {
+      "table_name": "draw_results"
+    },
+    {
+      "table_name": "matches"
+    },
+    {
+      "table_name": "match_scores"
+    },
+    {
+      "table_name": "users"
+    },
+    {
+      "table_name": "profiles"
+    },
+    {
+      "table_name": "settings"
+    },
+    {
+      "table_name": "admin_users"
+    }
+  ],
+  "columns": {
+    "registrations": [
+      {
+        "column_name": "id",
+        "sample_value": "8f25863a-6730-4b0f-93b0-e702f1cf4a4c"
+      },
+      {
+        "column_name": "school_name",
+        "sample_value": "SMA Negeri 1 Jakarta"
+      },
+      {
+        "column_name": "school_address",
+        "sample_value": "Jl. Budi Kemuliaan No. 6, Jakarta Pusat"
+      },
+      {
+        "column_name": "whatsapp",
+        "sample_value": "+6281234567801"
+      },
+      {
+        "column_name": "level",
+        "sample_value": "SMA"
+      },
+      {
+        "column_name": "gender",
+        "sample_value": "Putra"
+      },
+      {
+        "column_name": "logo_url",
+        "sample_value": null
+      },
+      {
+        "column_name": "players",
+        "sample_value": [
+          {
+            "name": "Ahmad Rizki",
+            "number": 1,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Tora Sudiro",
+            "number": 2,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Gilang Ramadhan",
+            "number": 3,
+            "position": "Small Forward"
+          },
+          {
+            "name": "Oscar Lawalata",
+            "number": 4,
+            "position": "Power Forward"
+          },
+          {
+            "name": "Kevin Sanjaya",
+            "number": 5,
+            "position": "Center"
+          },
+          {
+            "name": "Ivan Gunawan",
+            "number": 6,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Herjunot Ali",
+            "number": 7,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Budi Santoso",
+            "number": 8,
+            "position": "Small Forward"
+          }
+        ]
+      },
+      {
+        "column_name": "officials",
+        "sample_value": [
+          {
+            "name": "Pak Vincent",
+            "role": "Pelatih Kepala"
+          },
+          {
+            "name": "Bu Yuni",
+            "role": "Manager"
+          }
+        ]
+      },
+      {
+        "column_name": "status",
+        "sample_value": "Verified"
+      },
+      {
+        "column_name": "created_at",
+        "sample_value": "2026-03-23T09:46:16.939358+00:00"
+      },
+      {
+        "column_name": "updated_at",
+        "sample_value": "2026-03-23T09:46:16.939358+00:00"
+      }
+    ],
+    "draw_results": [
+      {
+        "column_name": "id",
+        "sample_value": "f0acb8ce-a049-42b0-a179-4610528b7cda"
+      },
+      {
+        "column_name": "category",
+        "sample_value": "sma-putra"
+      },
+      {
+        "column_name": "match_index",
+        "sample_value": 0
+      },
+      {
+        "column_name": "team1",
+        "sample_value": "SMA Negeri 8 Jakarta"
+      },
+      {
+        "column_name": "team2",
+        "sample_value": "SMA Negeri 94 Jakarta"
+      },
+      {
+        "column_name": "created_at",
+        "sample_value": "2026-03-29T14:28:14.504773+00:00"
+      }
+    ],
+    "matches": [
+      {
+        "column_name": "id",
+        "sample_value": "1e0c09c9-e6dd-4170-a94d-de18d0fe06cd"
+      },
+      {
+        "column_name": "category",
+        "sample_value": "sma-putra"
+      },
+      {
+        "column_name": "round",
+        "sample_value": "16 Besar"
+      },
+      {
+        "column_name": "match_number",
+        "sample_value": 1
+      },
+      {
+        "column_name": "day",
+        "sample_value": 1
+      },
+      {
+        "column_name": "match_time",
+        "sample_value": "15:00 - 16:00"
+      },
+      {
+        "column_name": "team1",
+        "sample_value": "SMA Negeri 8 Jakarta"
+      },
+      {
+        "column_name": "team2",
+        "sample_value": "SMA Negeri 94 Jakarta"
+      },
+      {
+        "column_name": "team1_from",
+        "sample_value": null
+      },
+      {
+        "column_name": "team2_from",
+        "sample_value": null
+      },
+      {
+        "column_name": "status",
+        "sample_value": "Not Play Yet"
+      },
+      {
+        "column_name": "created_at",
+        "sample_value": "2026-03-29T14:28:20.796+00:00"
+      },
+      {
+        "column_name": "updated_at",
+        "sample_value": "2026-03-29T14:28:20.796+00:00"
+      }
+    ],
+    "match_scores": [
+      {
+        "column_name": "id",
+        "sample_value": "affcafad-1d31-474f-bd21-b95f7ade3c69"
+      },
+      {
+        "column_name": "match_key",
+        "sample_value": "1-M01-sma-putri"
+      },
+      {
+        "column_name": "score1",
+        "sample_value": 15
+      },
+      {
+        "column_name": "score2",
+        "sample_value": 25
+      },
+      {
+        "column_name": "created_at",
+        "sample_value": "2026-03-29T14:28:28.791206+00:00"
+      },
+      {
+        "column_name": "updated_at",
+        "sample_value": "2026-03-29T14:28:28.282+00:00"
+      }
+    ],
+    "users": [
+      {
+        "column_name": "id",
+        "sample_value": "827647b7-08dc-48c4-ab70-8b195f513cea"
+      },
+      {
+        "column_name": "username",
+        "sample_value": "admin"
+      },
+      {
+        "column_name": "password_hash",
+        "sample_value": "$2b$10$f07AqmYsRddXewfIWnFvGeFoz5KhpGc8Apf07PGuBdWvgK00jovxK"
+      },
+      {
+        "column_name": "role",
+        "sample_value": "admin"
+      },
+      {
+        "column_name": "full_name",
+        "sample_value": null
+      },
+      {
+        "column_name": "email",
+        "sample_value": null
+      },
+      {
+        "column_name": "is_active",
+        "sample_value": true
+      },
+      {
+        "column_name": "created_at",
+        "sample_value": "2026-03-23T11:59:32.756+00:00"
+      },
+      {
+        "column_name": "updated_at",
+        "sample_value": "2026-03-23T11:59:32.756+00:00"
+      }
+    ],
+    "settings": [
+      {
+        "column_name": "id",
+        "sample_value": "ae51a6b2-3b4f-45d5-9217-202430724b2f"
+      },
+      {
+        "column_name": "bank_name",
+        "sample_value": "Bank BCAssss"
+      },
+      {
+        "column_name": "account_number",
+        "sample_value": "1234567890"
+      },
+      {
+        "column_name": "account_name",
+        "sample_value": "Panitia Yadika Cup 2026aaa"
+      },
+      {
+        "column_name": "registration_fee",
+        "sample_value": "20000001"
+      },
+      {
+        "column_name": "whatsapp_contact",
+        "sample_value": "+6281234567890"
+      },
+      {
+        "column_name": "created_at",
+        "sample_value": "2026-03-23T09:46:16.740812+00:00"
+      },
+      {
+        "column_name": "updated_at",
+        "sample_value": "2026-03-24T15:46:52.388+00:00"
+      }
+    ]
+  },
+  "foreignKeys": [],
+  "indexes": [],
+  "triggers": [],
+  "functions": [],
+  "sampleData": {
+    "registrations": [
+      {
+        "id": "8f25863a-6730-4b0f-93b0-e702f1cf4a4c",
+        "school_name": "SMA Negeri 1 Jakarta",
+        "school_address": "Jl. Budi Kemuliaan No. 6, Jakarta Pusat",
+        "whatsapp": "+6281234567801",
+        "level": "SMA",
+        "gender": "Putra",
+        "logo_url": null,
+        "players": [
+          {
+            "name": "Ahmad Rizki",
+            "number": 1,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Tora Sudiro",
+            "number": 2,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Gilang Ramadhan",
+            "number": 3,
+            "position": "Small Forward"
+          },
+          {
+            "name": "Oscar Lawalata",
+            "number": 4,
+            "position": "Power Forward"
+          },
+          {
+            "name": "Kevin Sanjaya",
+            "number": 5,
+            "position": "Center"
+          },
+          {
+            "name": "Ivan Gunawan",
+            "number": 6,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Herjunot Ali",
+            "number": 7,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Budi Santoso",
+            "number": 8,
+            "position": "Small Forward"
+          }
+        ],
+        "officials": [
+          {
+            "name": "Pak Vincent",
+            "role": "Pelatih Kepala"
+          },
+          {
+            "name": "Bu Yuni",
+            "role": "Manager"
+          }
+        ],
+        "status": "Verified",
+        "created_at": "2026-03-23T09:46:16.939358+00:00",
+        "updated_at": "2026-03-23T09:46:16.939358+00:00"
+      },
+      {
+        "id": "ff29cc91-cdfd-432f-a414-a08173faf961",
+        "school_name": "SMA Negeri 3 Jakarta",
+        "school_address": "Jl. Setiabudi Raya No. 15, Jakarta Selatan",
+        "whatsapp": "+6281234567802",
+        "level": "SMA",
+        "gender": "Putra",
+        "logo_url": null,
+        "players": [
+          {
+            "name": "Hendra Setiawan",
+            "number": 11,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Yuki Kato",
+            "number": 12,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Eko Prasetyo",
+            "number": 13,
+            "position": "Small Forward"
+          },
+          {
+            "name": "Fedi Nuril",
+            "number": 14,
+            "position": "Power Forward"
+          },
+          {
+            "name": "Candra Wijaya",
+            "number": 15,
+            "position": "Center"
+          },
+          {
+            "name": "Herjunot Ali",
+            "number": 16,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Ariel Tatum",
+            "number": 17,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Dedi Kurniawan",
+            "number": 18,
+            "position": "Small Forward"
+          }
+        ],
+        "officials": [
+          {
+            "name": "Pak Tukul",
+            "role": "Pelatih Kepala"
+          },
+          {
+            "name": "Bu Inul",
+            "role": "Manager"
+          }
+        ],
+        "status": "Verified",
+        "created_at": "2026-03-23T09:46:16.939358+00:00",
+        "updated_at": "2026-03-23T09:46:16.939358+00:00"
+      },
+      {
+        "id": "abe9d086-0199-4c2a-82bc-adbd0a2a2159",
+        "school_name": "SMA Negeri 6 Jakarta",
+        "school_address": "Jl. Mahakam No. 1, Jakarta Selatan",
+        "whatsapp": "+6281234567818",
+        "level": "SMA",
+        "gender": "Putri",
+        "logo_url": null,
+        "players": [
+          {
+            "name": "Raisa Andriana",
+            "number": 11,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Ayu Ting Ting",
+            "number": 12,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Isel Fricella",
+            "number": 13,
+            "position": "Small Forward"
+          },
+          {
+            "name": "Zaskia Gotik",
+            "number": 14,
+            "position": "Power Forward"
+          },
+          {
+            "name": "Brisia Jodie",
+            "number": 15,
+            "position": "Center"
+          },
+          {
+            "name": "Bunga Citra Lestari",
+            "number": 16,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Cut Syifa",
+            "number": 17,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Jefri Nichol",
+            "number": 18,
+            "position": "Small Forward"
+          }
+        ],
+        "officials": [
+          {
+            "name": "Pak Deddy",
+            "role": "Pelatih Kepala"
+          },
+          {
+            "name": "Bu Mega",
+            "role": "Manager"
+          }
+        ],
+        "status": "Verified",
+        "created_at": "2026-03-23T09:46:17.181515+00:00",
+        "updated_at": "2026-03-23T10:42:47.618+00:00"
+      },
+      {
+        "id": "1df2568a-5522-4bf2-83b9-a3f962b0f690",
+        "school_name": "SMA Negeri 87 Jakarta",
+        "school_address": "Jl. Benda Raya No. 1, Jakarta Selatan",
+        "whatsapp": "+6281234567811",
+        "level": "SMA",
+        "gender": "Putra",
+        "logo_url": null,
+        "players": [
+          {
+            "name": "Chico Jericho",
+            "number": 101,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Bryan Domani",
+            "number": 102,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Ahmad Rizki",
+            "number": 103,
+            "position": "Small Forward"
+          },
+          {
+            "name": "Joko Widodo",
+            "number": 104,
+            "position": "Power Forward"
+          },
+          {
+            "name": "Iko Uwais",
+            "number": 105,
+            "position": "Center"
+          },
+          {
+            "name": "Nanda Arsyad",
+            "number": 106,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Surya Saputra",
+            "number": 107,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Gading Marten",
+            "number": 108,
+            "position": "Small Forward"
+          }
+        ],
+        "officials": [
+          {
+            "name": "Pak Deddy",
+            "role": "Pelatih Kepala"
+          },
+          {
+            "name": "Bu Nunung",
+            "role": "Manager"
+          }
+        ],
+        "status": "Verified",
+        "created_at": "2026-03-23T09:46:16.939358+00:00",
+        "updated_at": "2026-03-23T09:46:16.939358+00:00"
+      },
+      {
+        "id": "26cc829c-6a13-4298-9bc3-e902372c5936",
+        "school_name": "SMA Negeri 21 Jakarta",
+        "school_address": "Jl. Raya Kebayoran Lama, Jakarta Selatan",
+        "whatsapp": "+6281234567820",
+        "level": "SMA",
+        "gender": "Putri",
+        "logo_url": null,
+        "players": [
+          {
+            "name": "Prilly Latuconsina",
+            "number": 31,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Cut Syifa",
+            "number": 32,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Ayu Ting Ting",
+            "number": 33,
+            "position": "Small Forward"
+          },
+          {
+            "name": "Hannah Al Rashid",
+            "number": 34,
+            "position": "Power Forward"
+          },
+          {
+            "name": "Nirina Zubir",
+            "number": 35,
+            "position": "Center"
+          },
+          {
+            "name": "Dinda Hauw",
+            "number": 36,
+            "position": "Point Guard"
+          },
+          {
+            "name": "Sandra Dewi",
+            "number": 37,
+            "position": "Shooting Guard"
+          },
+          {
+            "name": "Wulan Guritno",
+            "number": 38,
+            "position": "Small Forward"
+          }
+        ],
+        "officials": [
+          {
+            "name": "Pak Suharto",
+            "role": "Pelatih Kepala"
+          },
+          {
+            "name": "Bu Nunung",
+            "role": "Manager"
+          }
+        ],
+        "status": "Verified",
+        "created_at": "2026-03-23T09:46:17.181515+00:00",
+        "updated_at": "2026-03-23T09:46:17.181515+00:00"
+      }
+    ],
+    "draw_results": [
+      {
+        "id": "f0acb8ce-a049-42b0-a179-4610528b7cda",
+        "category": "sma-putra",
+        "match_index": 0,
+        "team1": "SMA Negeri 8 Jakarta",
+        "team2": "SMA Negeri 94 Jakarta",
+        "created_at": "2026-03-29T14:28:14.504773+00:00"
+      },
+      {
+        "id": "896842ed-25b1-43f2-a0a1-ccd85eaa5196",
+        "category": "sma-putra",
+        "match_index": 1,
+        "team1": "SMA Negeri 61 Jakarta",
+        "team2": "SMA Negeri 1 Jakarta",
+        "created_at": "2026-03-29T14:28:14.504773+00:00"
+      },
+      {
+        "id": "952e56ac-9d56-4cd8-bbd9-9745d9c26afd",
+        "category": "sma-putra",
+        "match_index": 2,
+        "team1": "SMA Labschool Kebayoran",
+        "team2": "SMA Negeri 3 Jakarta",
+        "created_at": "2026-03-29T14:28:14.504773+00:00"
+      },
+      {
+        "id": "cfccd46b-a204-4c09-9536-17c58a184365",
+        "category": "sma-putra",
+        "match_index": 3,
+        "team1": "SMA Negeri 34 Jakarta",
+        "team2": "SMA Negeri 28 Jakarta",
+        "created_at": "2026-03-29T14:28:14.504773+00:00"
+      },
+      {
+        "id": "c1240dc2-068f-46f6-b694-0631d6662c87",
+        "category": "sma-putra",
+        "match_index": 4,
+        "team1": "SMA Negeri 87 Jakarta",
+        "team2": "SMA Negeri 70 Jakarta",
+        "created_at": "2026-03-29T14:28:14.504773+00:00"
+      }
+    ],
+    "matches": [
+      {
+        "id": "1e0c09c9-e6dd-4170-a94d-de18d0fe06cd",
+        "category": "sma-putra",
+        "round": "16 Besar",
+        "match_number": 1,
+        "day": 1,
+        "match_time": "15:00 - 16:00",
+        "team1": "SMA Negeri 8 Jakarta",
+        "team2": "SMA Negeri 94 Jakarta",
+        "team1_from": null,
+        "team2_from": null,
+        "status": "Not Play Yet",
+        "created_at": "2026-03-29T14:28:20.796+00:00",
+        "updated_at": "2026-03-29T14:28:20.796+00:00"
+      },
+      {
+        "id": "089ff102-0dd1-4388-92cf-2e5191a8b098",
+        "category": "sma-putra",
+        "round": "16 Besar",
+        "match_number": 2,
+        "day": 1,
+        "match_time": "16:00 - 17:00",
+        "team1": "SMA Negeri 61 Jakarta",
+        "team2": "SMA Negeri 1 Jakarta",
+        "team1_from": null,
+        "team2_from": null,
+        "status": "Not Play Yet",
+        "created_at": "2026-03-29T14:28:20.796+00:00",
+        "updated_at": "2026-03-29T14:28:20.796+00:00"
+      },
+      {
+        "id": "ef5f2e7a-36c6-4f4d-bf30-65f4eeec0d26",
+        "category": "sma-putra",
+        "round": "16 Besar",
+        "match_number": 3,
+        "day": 1,
+        "match_time": "17:00 - 18:00",
+        "team1": "SMA Labschool Kebayoran",
+        "team2": "SMA Negeri 3 Jakarta",
+        "team1_from": null,
+        "team2_from": null,
+        "status": "Not Play Yet",
+        "created_at": "2026-03-29T14:28:20.796+00:00",
+        "updated_at": "2026-03-29T14:28:20.796+00:00"
+      },
+      {
+        "id": "4664c0da-1a8c-478f-a75e-6c21ca00afa6",
+        "category": "sma-putri",
+        "round": "16 Besar",
+        "match_number": 1,
+        "day": 1,
+        "match_time": "18:00 - 19:00",
+        "team1": "SMA Santa Ursula",
+        "team2": "SMA Negeri 21 Jakarta",
+        "team1_from": null,
+        "team2_from": null,
+        "status": "Not Play Yet",
+        "created_at": "2026-03-29T14:28:20.796+00:00",
+        "updated_at": "2026-03-29T14:28:20.796+00:00"
+      },
+      {
+        "id": "b9dab05f-3b94-41fb-90dc-6403030b9a16",
+        "category": "sma-putri",
+        "round": "16 Besar",
+        "match_number": 2,
+        "day": 1,
+        "match_time": "19:00 - 20:00",
+        "team1": "SMA Negeri 99 Jakarta",
+        "team2": "SMA Negeri 78 Jakarta",
+        "team1_from": null,
+        "team2_from": null,
+        "status": "Not Play Yet",
+        "created_at": "2026-03-29T14:28:20.796+00:00",
+        "updated_at": "2026-03-29T14:28:20.796+00:00"
+      }
+    ],
+    "match_scores": [
+      {
+        "id": "affcafad-1d31-474f-bd21-b95f7ade3c69",
+        "match_key": "1-M01-sma-putri",
+        "score1": 15,
+        "score2": 25,
+        "created_at": "2026-03-29T14:28:28.791206+00:00",
+        "updated_at": "2026-03-29T14:28:28.282+00:00"
+      },
+      {
+        "id": "7fabd817-5533-4747-875c-76b3edf32ec2",
+        "match_key": "1-M01-sma-putra",
+        "score1": 15,
+        "score2": 25,
+        "created_at": "2026-03-29T14:28:29.134072+00:00",
+        "updated_at": "2026-03-29T14:28:28.9+00:00"
+      },
+      {
+        "id": "0ffeb852-6cfe-4ada-9ea8-dcd49e65e7ef",
+        "match_key": "1-M02-sma-putra",
+        "score1": 25,
+        "score2": 15,
+        "created_at": "2026-03-29T14:28:29.331134+00:00",
+        "updated_at": "2026-03-29T14:28:29.155+00:00"
+      },
+      {
+        "id": "2e5f7732-a187-4266-ad68-c19eaac1ffd6",
+        "match_key": "1-M02-sma-putri",
+        "score1": 25,
+        "score2": 15,
+        "created_at": "2026-03-29T14:28:29.643839+00:00",
+        "updated_at": "2026-03-29T14:28:29.432+00:00"
+      },
+      {
+        "id": "c46246d0-adfb-42a6-b7d2-9d58db66a8a0",
+        "match_key": "1-M03-sma-putra",
+        "score1": 15,
+        "score2": 25,
+        "created_at": "2026-03-29T14:28:30.298411+00:00",
+        "updated_at": "2026-03-29T14:28:30.146+00:00"
+      }
+    ],
+    "users": [
+      {
+        "id": "827647b7-08dc-48c4-ab70-8b195f513cea",
+        "username": "admin",
+        "password_hash": "$2b$10$f07AqmYsRddXewfIWnFvGeFoz5KhpGc8Apf07PGuBdWvgK00jovxK",
+        "role": "admin",
+        "full_name": null,
+        "email": null,
+        "is_active": true,
+        "created_at": "2026-03-23T11:59:32.756+00:00",
+        "updated_at": "2026-03-23T11:59:32.756+00:00"
+      }
+    ],
+    "profiles": {
+      "error": "Could not find the table 'public.profiles' in the schema cache"
+    },
+    "settings": [
+      {
+        "id": "ae51a6b2-3b4f-45d5-9217-202430724b2f",
+        "bank_name": "Bank BCAssss",
+        "account_number": "1234567890",
+        "account_name": "Panitia Yadika Cup 2026aaa",
+        "registration_fee": "20000001",
+        "whatsapp_contact": "+6281234567890",
+        "created_at": "2026-03-23T09:46:16.740812+00:00",
+        "updated_at": "2026-03-24T15:46:52.388+00:00"
+      }
+    ],
+    "admin_users": {
+      "error": "Could not find the table 'public.admin_users' in the schema cache"
+    }
+  }
+}

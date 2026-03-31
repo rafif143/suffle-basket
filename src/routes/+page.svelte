@@ -1,15 +1,27 @@
 <script>
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { auth } from '$lib/stores/auth.js';
 
 	onMount(() => {
-		goto('/draw', { replaceState: true });
+		const unsubscribe = auth.subscribe(($auth) => {
+			if (!$auth.loading) {
+				if ($auth.isAuthenticated) {
+					goto('/draw', { replaceState: true });
+				} else {
+					goto('/live-scores', { replaceState: true });
+				}
+			}
+		});
+
+		auth.checkAuth();
+		return unsubscribe;
 	});
 </script>
 
-<div class="min-h-screen bg-neutral-50 flex items-center justify-center">
+<div class="min-h-screen bg-[#0f1123] flex items-center justify-center">
 	<div class="text-center">
-		<div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
-		<p class="mt-4 text-neutral-600 font-poppins">Redirecting...</p>
+		<div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent"></div>
+		<p class="mt-4 text-indigo-400 font-poppins font-bold animate-pulse">Initializing Yadika Cup...</p>
 	</div>
 </div>
