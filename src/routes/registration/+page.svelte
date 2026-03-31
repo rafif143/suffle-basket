@@ -148,7 +148,6 @@
 </svelte:head>
 
 <div class="min-h-screen bg-linear-to-br from-[#0f1123] via-[#1a1d35] to-[#0f1123] flex flex-col">
-	<PublicNavbar />
 	<!-- Hero Header -->
 	<header class="relative overflow-hidden">
 		<!-- Background decoration -->

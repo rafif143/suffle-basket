@@ -2,8 +2,8 @@
 	import { onMount } from 'svelte';
 	import { CategoryFilter } from '$lib/components/features';
 	import { ScoreModal, MatchTable, ScheduleMatchCard } from '$lib/components/features/SchedulePage';
-	import { PublicNavbar } from '$lib/components/ui';
 	import { scheduleService, pdfService } from '$lib/services';
+	import { auth } from '$lib/stores/auth.svelte.js';
 	import { CATEGORY_LABELS, PAGE_SIZE, TOTAL_DAYS } from '$lib/constants/tournament';
 	import { generateMatchKey, test16Besar, test8Besar, testSemiFinal } from '$lib/utils/testHelpers';
 
@@ -209,9 +209,6 @@
 </svelte:head>
 
 <div class="flex min-h-screen flex-col bg-linear-to-br from-neutral-50 via-white to-neutral-50/50">
-	{#if !auth.isAuthenticated}
-		<PublicNavbar />
-	{/if}
 	<header class="sticky top-0 z-20 border-b border-neutral-200/50 bg-white/90 backdrop-blur-sm">
 		<div class="flex flex-wrap items-center justify-between gap-4 px-8 py-5">
 			<div>

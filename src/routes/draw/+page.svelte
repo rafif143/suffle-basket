@@ -170,9 +170,6 @@
 </svelte:head>
 
 <div class="min-h-screen bg-linear-to-br from-neutral-50 via-white to-neutral-50/50">
-	{#if !auth.isAuthenticated}
-		<PublicNavbar />
-	{/if}
 	<header class="border-b border-neutral-200/50 bg-white/80 px-8 py-6 shadow-sm backdrop-blur-md">
 		<div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
 			<div>

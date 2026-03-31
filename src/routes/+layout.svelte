@@ -17,12 +17,9 @@
 	// Auth state
 	let authState = { isAuthenticated: false, user: null, loading: true };
 
-	// Check if current route is public (no auth required, no sidebar)
+	// Check if current route is public (no auth required)
 	$: isPublicRoute = $page.url.pathname === '/login' ||
-					  $page.url.pathname === '/live-scores' ||
-					  $page.url.pathname === '/registration' ||
-					  $page.url.pathname === '/schedule' ||
-					  $page.url.pathname === '/draw';
+					  $page.url.pathname === '/live-scores';
 
 	// For public routes, don't show loading state
 	$: showLoading = auth.loading && !isPublicRoute;
@@ -42,8 +39,8 @@
 	}
 </script>
 
-{#if isPublicRoute}
-	<!-- Public routes (login, live-scores) - no sidebar -->
+{#if isPublicRoute && !auth.isAuthenticated}
+	<!-- Public user on public route (login, live-scores) - no sidebar -->
 	<slot />
 {:else if showLoading}
 	<!-- Loading state -->
@@ -53,8 +50,8 @@
 			<p class="text-neutral-600 font-poppins">Loading...</p>
 		</div>
 	</div>
-{:else if auth.isAuthenticated}
-	<!-- Protected routes - with sidebar -->
+{:else if auth.isAuthenticated && $page.url.pathname !== '/login'}
+	<!-- Authenticated admin - show sidebar everywhere except login page -->
 	<div class="flex h-screen overflow-hidden bg-neutral-50">
 		<!-- Sidebar -->
 		<aside class="fixed left-0 top-0 h-full bg-[#1a1d2e] flex flex-col transition-all duration-300 ease-out z-50 overflow-hidden {isSidebarOpen ? 'w-60' : 'w-[72px]'}">
@@ -154,4 +151,7 @@
 			<slot />
 		</main>
 	</div>
+{:else}
+	<!-- Catch-all for other states (e.g. login page when authenticated) -->
+	<slot />
 {/if}
