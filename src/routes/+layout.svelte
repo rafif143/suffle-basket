@@ -1,11 +1,13 @@
 <script>
 	import './layout.css';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onMount, setContext } from 'svelte';
+	import { Toast } from '$lib/components/ui';
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/stores/auth.svelte.js';
 	
-	let isSidebarOpen = true;
+	let { children } = $props();
+	let isSidebarOpen = $state(true);
 	
 	const navItems = [
 		{ href: '/draw', label: 'Draw', icon: 'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.27 6.96 12 12.01l8.73-5.05M12 22.08V12' },
@@ -18,18 +20,26 @@
 	let authState = { isAuthenticated: false, user: null, loading: true };
 
 	// Check if current route is public (no auth required)
-	$: isPublicRoute = $page.url.pathname === '/login' ||
-					  $page.url.pathname === '/live-scores';
+	let isPublicRoute = $derived(
+		$page.url.pathname === '/login' ||
+		$page.url.pathname === '/live-scores'
+	);
 
 	// For public routes, don't show loading state
-	$: showLoading = auth.loading && !isPublicRoute;
+	let showLoading = $derived(auth.loading && !isPublicRoute);
+
+	// Reactive protection logic
+	$effect(() => {
+		// Skip if still loading auth
+		if (auth.loading) return;
+
+		// If not authenticated and trying to access a non-public route
+		if (!auth.isAuthenticated && !isPublicRoute && $page.url.pathname !== '/') {
+			goto('/login?redirect=' + encodeURIComponent($page.url.pathname + $page.url.search));
+		}
+	});
 
 	onMount(() => {
-		// Only redirect if not loading and not authenticated and not on public route
-		if (!auth.loading && !auth.isAuthenticated && !isPublicRoute) {
-			goto('/login');
-		}
-
 		auth.checkAuth();
 	});
 
@@ -41,7 +51,7 @@
 
 {#if isPublicRoute && !auth.isAuthenticated}
 	<!-- Public user on public route (login, live-scores) - no sidebar -->
-	<slot />
+	{@render children()}
 {:else if showLoading}
 	<!-- Loading state -->
 	<div class="min-h-screen bg-neutral-50 flex items-center justify-center">
@@ -148,10 +158,12 @@
 
 		<!-- Main Content -->
 		<main class="flex-1 {isSidebarOpen ? 'ml-60' : 'ml-[72px]'} transition-all duration-300 ease-out overflow-auto">
-			<slot />
+			{@render children()}
 		</main>
 	</div>
 {:else}
 	<!-- Catch-all for other states (e.g. login page when authenticated) -->
-	<slot />
+	{@render children()}
 {/if}
+
+<Toast />

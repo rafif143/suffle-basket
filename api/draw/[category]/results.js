@@ -40,7 +40,7 @@ export default async function handler(req, res) {
       if (!data || data.length === 0) {
         return res.status(200).json({
           success: true,
-          data: Array(8).fill({ team1: '?', team2: '?' })
+          data: Array(8).fill({ team1: 'TBD', team2: 'TBD' })
         });
       }
 

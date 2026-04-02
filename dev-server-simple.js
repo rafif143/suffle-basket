@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-// Load env
+// Load env (try .env.local first to match SvelteKit behavior)
+dotenv.config({ path: '.env.local' });
 dotenv.config();
 
 const app = express();
@@ -11,6 +12,13 @@ const PORT = 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Log environment status
+console.log('--- Environment Check ---');
+console.log('SUPABASE_URL:', process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL ? '✅ LOADED' : '❌ MISSING');
+console.log('SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY ? '✅ LOADED' : '❌ MISSING');
+console.log('ANON_KEY:', process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY ? '✅ LOADED' : '❌ MISSING');
+console.log('-------------------------');
 
 console.log('🔄 Starting simple backend server...');
 
@@ -40,10 +48,7 @@ try {
 
   // Load draw results handler
   const drawResultsHandler = (await import('./api/draw/[category]/results.js')).default;
-  app.all('/api/draw/:category/results', (req, res) => {
-    const mockReq = { ...req, query: { ...req.query, category: req.params.category } };
-    drawResultsHandler(mockReq, res);
-  });
+  app.all('/api/draw/:category/results', drawResultsHandler);
   console.log('✅ Draw results handler loaded');
 
   // Load schedule handler

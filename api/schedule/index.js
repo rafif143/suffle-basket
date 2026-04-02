@@ -143,6 +143,13 @@ export default async function handler(req, res) {
         draw.team1 !== 'TBD' && draw.team2 !== 'TBD'
       );
 
+      // Create a map for quick lookup: category -> match_index -> draw
+      const drawMap = {};
+      drawResults.forEach(d => {
+        if (!drawMap[d.category]) drawMap[d.category] = {};
+        drawMap[d.category][d.match_index] = d;
+      });
+
       // 1. Fetch existing matches from the 'matches' table
       let { data: matches, error: matchesError } = await supabase
         .from('matches')
@@ -362,6 +369,15 @@ export default async function handler(req, res) {
 
         let team1 = m.team1;
         let team2 = m.team2;
+
+        // Resolve 16 Besar teams from draw_results first
+        if (m.round === '16 Besar') {
+          const draw = drawMap[m.category] ? drawMap[m.category][m.match_number - 1] : null;
+          if (draw) {
+            team1 = draw.team1 || 'TBD';
+            team2 = draw.team2 || 'TBD';
+          }
+        }
 
         // Resolve winners from previous matches
         if (m.team1_from) {

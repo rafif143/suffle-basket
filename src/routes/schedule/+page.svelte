@@ -4,6 +4,7 @@
 	import { ScoreModal, MatchTable, ScheduleMatchCard } from '$lib/components/features/SchedulePage';
 	import { scheduleService, pdfService } from '$lib/services';
 	import { auth } from '$lib/stores/auth.svelte.js';
+	import { toast } from '$lib/stores/toast.svelte.js';
 	import { CATEGORY_LABELS, PAGE_SIZE, TOTAL_DAYS } from '$lib/constants/tournament';
 	import { generateMatchKey, test16Besar, test8Besar, testSemiFinal } from '$lib/utils/testHelpers';
 
@@ -103,9 +104,10 @@
 			
 			// Refetch schedule data to get updated winners (auto-refresh tanpa reload)
 			await refreshSchedule();
+			toast.success('Score updated successfully!');
 		} catch (error) {
 			console.error('Failed to save score:', error);
-			alert('Failed to save score. Please try again.');
+			toast.error('Failed to save score. Please try again.');
 		}
 	}
 
@@ -129,7 +131,7 @@
 		if (scheduleData.length === 0) return alert('No matches found to test.');
 		if (!confirm('Test input scores for all 16 Besar matches?')) return;
 		const result = await test16Besar(scheduleData);
-		alert(`${result.message} Updating...`);
+		toast.success(result.message);
 		await refreshSchedule();
 	}
 
@@ -137,7 +139,7 @@
 		if (scheduleData.length === 0) return alert('No matches found to test.');
 		if (!confirm('Test input scores for all 8 Besar matches?')) return;
 		const result = await test8Besar(scheduleData);
-		alert(`${result.message} Updating...`);
+		toast.success(result.message);
 		await refreshSchedule();
 	}
 
@@ -145,7 +147,7 @@
 		if (scheduleData.length === 0) return alert('No matches found to test.');
 		if (!confirm('Test input scores for all Semi Final matches?')) return;
 		const result = await testSemiFinal(scheduleData);
-		alert(`${result.message} Updating...`);
+		toast.success(result.message);
 		await refreshSchedule();
 	}
 

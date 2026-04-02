@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { NotificationModal, PublicNavbar } from '$lib/components/ui';
-	import { MatchCard, BracketVisualization } from '$lib/components/features';
+	import { MatchCard } from '$lib/components/features';
 	import { TeamInput } from '$lib/components/features/DrawPage';
 	import { DrawControls, ShuffleModal, DevModeControls } from '$lib/components/features/DrawPage';
 	import { auth } from '$lib/stores/auth.svelte.js';
@@ -14,9 +14,8 @@
 	let activeGender = $state(GENDERS[0]);
 
 	let teamsInput = $state([]);
-	let drawResults = $state(Array(MATCHES_PER_CATEGORY).fill({ team1: '?', team2: '?' }));
+	let drawResults = $state(Array(MATCHES_PER_CATEGORY).fill({ team1: 'TBD', team2: 'TBD' }));
 	let matchScores = $state({});
-	let showBracket = $state(false);
 	let isShuffling = $state(false);
 
 	// Modal states
@@ -28,10 +27,9 @@
 		matchIndex: -1,
 	});
 
-	let resetModal = $state({ isOpen: false, title: 'Reset Draw', message: 'Are you sure you want to reset all draw results for this category?' });
 	let devModal = $state({ isOpen: false, title: '', message: '', isProcessing: false });
 
-	let currentMatchIndex = $derived(drawResults.findIndex(m => m.team1 === '?' || m.team2 === '?'));
+	let currentMatchIndex = $derived(drawResults.findIndex(m => m.team1 === 'TBD' || m.team2 === 'TBD'));
 	let completedMatches = $derived(MATCHES_PER_CATEGORY - 1 - currentMatchIndex);
 	let shuffleDay = $derived(getMatchDay(activeLevel, activeGender, shuffleModal.matchIndex));
 	let shuffleTime = $derived(getMatchTime(shuffleDay, getMatchIndexInDay(activeLevel, activeGender, shuffleModal.matchIndex)));
@@ -64,12 +62,14 @@
 
 	function handleShuffle() {
 		if (isShuffling) return;
-		const nextIdx = drawResults.findIndex(m => m.team1 === '?' || m.team2 === '?');
+		const nextIdx = drawResults.findIndex(m => m.team1 === 'TBD' || m.team2 === 'TBD');
 		if (nextIdx === -1) return;
 		
 		shuffleModal = {
 			...shuffleModal,
 			isOpen: true,
+			team1: '???',
+			team2: '???',
 			message: `Ready to draw teams for Match ${nextIdx + 1}?`,
 			matchIndex: nextIdx,
 		};
@@ -77,9 +77,16 @@
 
 	function startActualShuffle() {
 		if (isShuffling) return;
-		const drawnTeams = drawResults.flatMap(m => [m.team1, m.team2]).filter(t => t !== '?' && t !== 'TBD');
+		
+		const drawnTeams = drawResults.flatMap(m => [m.team1, m.team2]).filter(t => t !== 'TBD' && t !== '?');
 		const remainingTeams = teamsInput.filter(t => !drawnTeams.includes(t));
-		if (remainingTeams.length < 2 || shuffleModal.matchIndex === -1) return;
+		
+		if (remainingTeams.length < 2) {
+			alert('Not enough remaining teams to draw a complete match! Please ensure all teams are registered and verified.');
+			return;
+		}
+		
+		if (shuffleModal.matchIndex === -1) return;
 
 		isShuffling = true;
 		shuffleModal = { ...shuffleModal, isShuffling: true };
@@ -87,37 +94,38 @@
 		let counter = 0;
 		const timer = setInterval(() => {
 			counter += SHUFFLE_INTERVAL;
-			shuffleModal.team1 = remainingTeams[Math.floor(Math.random() * remainingTeams.length)];
-			shuffleModal.team2 = remainingTeams[Math.floor(Math.random() * remainingTeams.length)];
+			
+			// Show random teams during animation
+			const idx1 = Math.floor(Math.random() * remainingTeams.length);
+			let idx2 = Math.floor(Math.random() * remainingTeams.length);
+			while (idx1 === idx2 && remainingTeams.length > 1) {
+				idx2 = Math.floor(Math.random() * remainingTeams.length);
+			}
+			
+			shuffleModal.team1 = remainingTeams[idx1];
+			shuffleModal.team2 = remainingTeams[idx2];
 			
 			if (counter >= SHUFFLE_DURATION) {
 				clearInterval(timer);
 				const shuffled = [...remainingTeams].sort(() => 0.5 - Math.random());
-				shuffleModal = { ...shuffleModal, team1: shuffled[0], team2: shuffled[1], isShuffling: false };
+				const team1 = shuffled[0];
+				const team2 = shuffled[1];
 				
-				drawResults[shuffleModal.matchIndex] = { team1: shuffled[0], team2: shuffled[1] };
+				shuffleModal = { ...shuffleModal, team1, team2, isShuffling: false };
+				
+				drawResults[shuffleModal.matchIndex] = { team1, team2 };
 				drawResults = [...drawResults];
 				
 				const cat = `${activeLevel.toLowerCase()}-${activeGender.toLowerCase()}`;
-				drawService.saveResults(cat, drawResults).catch(err => console.error('Failed to save:', err));
+				drawService.saveResults(cat, drawResults)
+					.catch(err => {
+						console.error('Failed to save draw results:', err);
+						alert('Match confirmed locally but failed to save to server. Please check your connection.');
+					});
+				
 				isShuffling = false;
 			}
 		}, SHUFFLE_INTERVAL);
-	}
-
-	function handleReset() {
-		resetModal.isOpen = true;
-		resetModal.onConfirm = async () => {
-			try {
-				const cat = `${activeLevel.toLowerCase()}-${activeGender.toLowerCase()}`;
-				await drawService.resetDraw(cat);
-				await loadData();
-				resetModal.isOpen = false;
-			} catch (error) {
-				console.error('Failed to reset draw:', error);
-				alert('Failed to reset draw. Please try again.');
-			}
-		};
 	}
 
 	function handleGeneratePDF() {
@@ -138,7 +146,7 @@
 					const data = await drawService.devAction(action);
 					if (data.success) {
 						apiCache.clear();
-						drawResults = Array(MATCHES_PER_CATEGORY).fill({ team1: '?', team2: '?' });
+						drawResults = Array(MATCHES_PER_CATEGORY).fill({ team1: 'TBD', team2: 'TBD' });
 						teamsInput = [];
 						matchScores = {};
 						await loadData();
@@ -160,8 +168,12 @@
 	}
 
 	function handleNextShuffle() {
-		closeShuffleModal();
-		handleShuffle();
+		const isLastMatch = drawResults.filter(m => m.team1 === 'TBD' || m.team2 === 'TBD').length === 0;
+		if (isLastMatch) {
+			closeShuffleModal();
+		} else {
+			handleShuffle();
+		}
 	}
 </script>
 
@@ -212,29 +224,21 @@
 			{/if}
 			<div class="col-span-1 {auth.isAuthenticated ? 'lg:col-span-8' : 'lg:col-span-12'} space-y-6">
 				{#if auth.isAuthenticated}
-					<DrawControls {currentMatchIndex} {isShuffling} {completedMatches} onShuffle={handleShuffle} onReset={handleReset} onGeneratePDF={handleGeneratePDF} />
+					<DrawControls {currentMatchIndex} {isShuffling} {completedMatches} onShuffle={handleShuffle} onGeneratePDF={handleGeneratePDF} />
 				{/if}
 				
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-4">
-						<h3 class="font-montserrat text-lg font-extrabold text-neutral-900">{showBracket ? 'Tournament Bracket' : 'Draw Results'}</h3>
+						<h3 class="font-montserrat text-lg font-extrabold text-neutral-900">Draw Results</h3>
 						<span class="text-sm font-poppins font-medium text-neutral-600">- {category}</span>
-					</div>
-					<div class="flex rounded-xl bg-neutral-100 p-0.5">
-						<button onclick={() => showBracket = false} class="rounded-lg px-4 py-2 font-poppins text-sm font-semibold transition-all {!showBracket ? 'bg-white text-indigo-600 shadow-sm' : 'text-neutral-500'}">Draw View</button>
-						<button onclick={() => showBracket = true} class="rounded-lg px-4 py-2 font-poppins text-sm font-semibold transition-all {showBracket ? 'bg-white text-indigo-600 shadow-sm' : 'text-neutral-500'}">Bracket View</button>
 					</div>
 				</div>
 
-				{#if showBracket}
-					<BracketVisualization matches={drawResults} level={activeLevel} gender={activeGender} scores={matchScores} />
-				{:else}
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-						{#each drawResults as match, index}
-							<MatchCard {match} {index} level={activeLevel} gender={activeGender} />
-						{/each}
-					</div>
-				{/if}
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+					{#each drawResults as match, index}
+						<MatchCard {match} {index} level={activeLevel} gender={activeGender} />
+					{/each}
+				</div>
 			</div>
 		</div>
 	</main>
@@ -249,10 +253,9 @@
 	day={shuffleDay}
 	time={shuffleTime}
 	matchIndex={shuffleModal.matchIndex}
+	onStart={startActualShuffle}
 	onNext={handleNextShuffle}
 	onBackToMenu={closeShuffleModal}
 />
-
-<NotificationModal isOpen={resetModal.isOpen} title={resetModal.title} message={resetModal.message} type="confirm" onConfirm={resetModal.onConfirm} onClose={() => resetModal.isOpen = false} onCancel={() => resetModal.isOpen = false} />
 
 <DevModeControls isOpen={devModal.isOpen} isProcessing={devModal.isProcessing} title={devModal.title} message={devModal.message} onConfirm={devModal.onConfirm} onCancel={devModal.onCancel} />

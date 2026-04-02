@@ -47,10 +47,11 @@ export const apiClient = {
       }
 
       if (!response.ok) {
-        // Handle auth errors
-        if (response.status === 401 && browser) {
+        // Handle auth errors (avoid infinite loops)
+        if (response.status === 401 && browser && !window.location.pathname.startsWith('/login')) {
           localStorage.removeItem('auth_token');
-          window.location.href = '/login';
+          const currentPath = window.location.pathname + window.location.search;
+          window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
           return;
         }
         throw new Error(data.message || data.error || `API request failed with status ${response.status}`);

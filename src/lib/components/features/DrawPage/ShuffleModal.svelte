@@ -8,6 +8,7 @@
 		day = 1,
 		time = '',
 		matchIndex = -1,
+		onStart = null,
 		onNext = null,
 		onBackToMenu = null
 	} = $props();
@@ -25,7 +26,13 @@
 			</div>
 
 			<h2 class="mb-12 font-montserrat text-3xl font-bold {isShuffling ? 'animate-pulse text-indigo-400' : 'text-white'}">
-				{isShuffling ? `Drawing Match ${matchIndex + 1}...` : `Match ${matchIndex + 1} Confirmed!`}
+				{#if isShuffling}
+					Drawing Match {matchIndex + 1}...
+				{:else if team1 === '???'}
+					Ready to draw Match {matchIndex + 1}
+				{:else}
+					Match {matchIndex + 1} Confirmed!
+				{/if}
 			</h2>
 
 			<div class="flex w-full flex-col items-center justify-center gap-12 md:flex-row">
@@ -40,9 +47,14 @@
 				</div>
 			</div>
 
-			{#if !isShuffling && onNext}
+			{#if !isShuffling}
 				<div class="mt-16 flex items-center justify-center gap-6">
-					<button onclick={onNext} class="rounded-xl bg-indigo-600 px-8 py-4 text-sm font-poppins font-semibold text-white shadow-lg hover:bg-neutral-900 transition-all">Next Shuffle</button>
+					{#if team1 === '???'}
+						<button onclick={onStart} class="rounded-xl bg-indigo-600 px-12 py-5 text-lg font-poppins font-bold text-white shadow-xl shadow-indigo-500/40 hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all">START DRAW</button>
+					{:else if onNext}
+						<button onclick={onNext} class="rounded-xl bg-indigo-600 px-8 py-4 text-sm font-poppins font-semibold text-white shadow-lg hover:bg-neutral-900 transition-all">Next Shuffle</button>
+					{/if}
+					
 					{#if onBackToMenu}
 						<button onclick={onBackToMenu} class="rounded-xl border border-neutral-800 bg-neutral-900 px-8 py-4 text-sm font-poppins font-medium text-neutral-400 hover:bg-neutral-800 transition-all">Back to Menu</button>
 					{/if}

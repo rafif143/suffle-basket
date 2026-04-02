@@ -6,28 +6,11 @@
 		isShuffling = false,
 		completedMatches = 0,
 		onShuffle = null,
-		onReset = null,
 		onGeneratePDF = null
 	} = $props();
-
-	let progress = $derived((completedMatches / MATCHES_PER_CATEGORY) * 100);
 </script>
 
 <div class="space-y-4">
-	<!-- Progress Bar -->
-	<div class="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-		<div class="mb-2 flex items-center justify-between">
-			<span class="text-sm font-poppins font-semibold text-neutral-700">Draw Progress</span>
-			<span class="text-sm font-montserrat font-bold text-indigo-600">{completedMatches}/{MATCHES_PER_CATEGORY}</span>
-		</div>
-		<div class="h-2 overflow-hidden rounded-full bg-neutral-100">
-			<div class="h-full bg-linear-to-r from-indigo-600 to-purple-600 transition-all duration-300" style="width: {progress}%"></div>
-		</div>
-		{#if currentMatchIndex !== -1}
-			<p class="mt-2 text-xs text-neutral-500">Next: Match {currentMatchIndex + 1}</p>
-		{/if}
-	</div>
-
 	<!-- Action Buttons -->
 	<div class="flex flex-wrap gap-3">
 		<button
@@ -40,17 +23,6 @@
 				<path d="m9 11 3 3L22 4" />
 			</svg>
 			{isShuffling ? 'Shuffling...' : 'Shuffle'}
-		</button>
-
-		<button
-			onclick={onReset}
-			class="flex items-center gap-2 rounded-xl border-2 border-rose-200 bg-white px-6 py-3 font-poppins text-sm font-bold text-rose-600 transition-all hover:bg-rose-50 hover:border-rose-300"
-		>
-			<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-				<path d="M3 3v5h5" />
-			</svg>
-			Reset
 		</button>
 
 		<button
