@@ -22,7 +22,8 @@
 	// Check if current route is public (no auth required)
 	let isPublicRoute = $derived(
 		$page.url.pathname === '/login' ||
-		$page.url.pathname === '/live-scores'
+		$page.url.pathname === '/live-scores' ||
+		$page.url.pathname === '/registration'
 	);
 
 	// For public routes, don't show loading state
