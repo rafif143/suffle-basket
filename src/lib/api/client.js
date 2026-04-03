@@ -90,6 +90,7 @@ export const apiClient = {
     }
     if (endpoint.includes('/schedule')) {
       apiCache.delete('GET:/schedule?scores=true');
+      apiCache.delete('GET:/schedule');
     }
     if (endpoint.includes('/matches')) {
       apiCache.delete('GET:/matches');
