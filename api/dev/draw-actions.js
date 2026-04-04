@@ -53,20 +53,64 @@ export default async function handler(req, res) {
 }
 
 /**
- * Auto draw all categories
+ * Auto draw all categories with Smart Shuffling
+ * Ensures same schools don't play on the same day across different categories (e.g. Putra vs Putri)
  */
 async function drawAllCategories(req, res) {
   const categories = ['sma-putra', 'sma-putri', 'smp-putra', 'smp-putri'];
   const results = {};
+  const logs = [];
+  
+  const addLog = (msg) => {
+    logs.push(msg);
+    console.log(`[SmartShuffle] ${msg}`);
+  };
+
+  addLog('Starting Smart Shuffling for all categories...');
+
+  // Track which schools are playing on which day to prevent conflicts
+  const dayAssignments = {
+    1: new Set(), 2: new Set(), 3: new Set(), 4: new Set(), 5: new Set(), 6: new Set()
+  };
+
+  const normalize = (name) => {
+    if (!name) return '';
+    return name.toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+  };
+
+  const getSlotDay = (level, matchIndex) => {
+    if (level === 'SMA') {
+      if (matchIndex <= 2) return 1;
+      if (matchIndex <= 4) return 3;
+      return 5;
+    } else {
+      if (matchIndex <= 2) return 2;
+      if (matchIndex <= 4) return 4;
+      return 6;
+    }
+  };
+
+  const getSlotDayPutri = (level, matchIndex) => {
+    if (level === 'SMA') {
+      if (matchIndex <= 1) return 1;
+      if (matchIndex <= 4) return 3;
+      return 5;
+    } else {
+      if (matchIndex <= 1) return 2;
+      if (matchIndex <= 4) return 4;
+      return 6;
+    }
+  };
 
   for (const category of categories) {
     try {
-      // Parse category
       const parts = category.split('-');
       const level = parts[0].toUpperCase();
       const gender = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+      const isPutri = gender === 'Putri';
 
-      // Get verified registrations for this category
+      addLog(`\n--- Picking teams for ${level} ${gender} ---`);
+
       const { data: registrations, error: regError } = await supabase
         .from('registrations')
         .select('school_name')
@@ -77,58 +121,83 @@ async function drawAllCategories(req, res) {
       if (regError) throw regError;
 
       if (registrations.length < 16) {
-        results[category] = {
-          success: false,
-          message: `Not enough teams (${registrations.length}/16)`
-        };
+        addLog(`❌ Not enough teams for ${category} (${registrations.length}/16)`);
+        results[category] = { success: false, message: `Not enough teams` };
         continue;
       }
 
-      // Shuffle teams
-      const teams = registrations.map(r => r.school_name);
-      const shuffled = [...teams].sort(() => 0.5 - Math.random());
-
-      // Create 8 matches
+      const pool = registrations.map(r => r.school_name).sort(() => 0.5 - Math.random());
       const drawResults = [];
+
       for (let i = 0; i < 8; i++) {
+        const day = isPutri ? getSlotDayPutri(level, i) : getSlotDay(level, i);
+        
+        let team1Idx = -1;
+        let team2Idx = -1;
+
+        // Team 1 Selection
+        for (let j = 0; j < pool.length; j++) {
+          const normName = normalize(pool[j]);
+          if (!dayAssignments[day].has(normName)) {
+            team1Idx = j;
+            break;
+          } else {
+            // addLog(`Skipping ${pool[j]} for Day ${day} (already assigned in other category)`);
+          }
+        }
+        
+        if (team1Idx === -1) {
+          addLog(`⚠️ Warning: Forced conflict for Team 1 in Day ${day} slot ${i+1}`);
+          team1Idx = 0;
+        }
+        const team1 = pool.splice(team1Idx, 1)[0];
+        dayAssignments[day].add(normalize(team1));
+
+        // Team 2 Selection
+        for (let j = 0; j < pool.length; j++) {
+          const normName = normalize(pool[j]);
+          if (!dayAssignments[day].has(normName)) {
+            team2Idx = j;
+            break;
+          }
+        }
+        
+        if (team2Idx === -1) {
+          addLog(`⚠️ Warning: Forced conflict for Team 2 in Day ${day} slot ${i+1}`);
+          team2Idx = 0;
+        }
+        const team2 = pool.splice(team2Idx, 1)[0];
+        dayAssignments[day].add(normalize(team2));
+
+        addLog(`Match ${i+1} (Day ${day}): ${team1} vs ${team2}`);
+
         drawResults.push({
-          category: category,
+          category,
           match_index: i,
-          team1: shuffled[i * 2],
-          team2: shuffled[i * 2 + 1]
+          team1,
+          team2
         });
       }
 
-      // Delete existing draw results
-      await supabase
-        .from('draw_results')
-        .delete()
-        .eq('category', category);
-
-      // Insert new draw results
-      const { error: insertError } = await supabase
-        .from('draw_results')
-        .insert(drawResults);
-
+      await supabase.from('draw_results').delete().eq('category', category);
+      const { error: insertError } = await supabase.from('draw_results').insert(drawResults);
       if (insertError) throw insertError;
 
-      results[category] = {
-        success: true,
-        matches: drawResults.length
-      };
+      results[category] = { success: true, matches: drawResults.length };
 
     } catch (error) {
-      results[category] = {
-        success: false,
-        message: error.message
-      };
+      addLog(`❌ Error processing ${category}: ${error.message}`);
+      results[category] = { success: false, message: error.message };
     }
   }
 
+  addLog('\n✅ Smart Auto Draw completed successfully!');
+
   return res.status(200).json({
     success: true,
-    message: 'Auto draw completed',
-    results
+    message: 'Draw completed',
+    results,
+    logs
   });
 }
 

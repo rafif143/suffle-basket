@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { CategoryFilter } from '$lib/components/features';
-	import { ScoreModal, MatchTable, ScheduleMatchCard } from '$lib/components/features/SchedulePage';
+	import { ScoreModal, MatchTable, ScheduleMatchCard, TestProcessModal } from '$lib/components/features/SchedulePage';
 	import { scheduleService, pdfService } from '$lib/services';
 	import { auth } from '$lib/stores/auth.svelte.js';
 	import { toast } from '$lib/stores/toast.svelte.js';
@@ -14,6 +14,7 @@
 	let showExportMenu = $state(false);
 
 	let scoreModal = $state({ isOpen: false, match: null, score1: '', score2: '' });
+	let testModal = $state({ isOpen: false, title: '', logs: [], isComplete: false });
 	let scheduleData = $state([]);
 	let matchScores = $state({});
 
@@ -127,10 +128,18 @@
 		}
 	}
 
+	function addLog(message) {
+		testModal.logs = [...testModal.logs, message];
+	}
+
 	async function testAll16BesarScores() {
 		if (scheduleData.length === 0) return alert('No matches found to test.');
 		if (!confirm('Test input scores for all 16 Besar matches?')) return;
-		const result = await test16Besar(scheduleData);
+		
+		testModal = { isOpen: true, title: 'Test 16 Besar', logs: [], isComplete: false };
+		const result = await test16Besar(scheduleData, addLog);
+		testModal.isComplete = true;
+		
 		toast.success(result.message);
 		await refreshSchedule();
 	}
@@ -138,7 +147,11 @@
 	async function testAll8BesarScores() {
 		if (scheduleData.length === 0) return alert('No matches found to test.');
 		if (!confirm('Test input scores for all 8 Besar matches?')) return;
-		const result = await test8Besar(scheduleData);
+		
+		testModal = { isOpen: true, title: 'Test 8 Besar (QF)', logs: [], isComplete: false };
+		const result = await test8Besar(scheduleData, addLog);
+		testModal.isComplete = true;
+		
 		toast.success(result.message);
 		await refreshSchedule();
 	}
@@ -146,9 +159,17 @@
 	async function testAllSemiFinalScores() {
 		if (scheduleData.length === 0) return alert('No matches found to test.');
 		if (!confirm('Test input scores for all Semi Final matches?')) return;
-		const result = await testSemiFinal(scheduleData);
+		
+		testModal = { isOpen: true, title: 'Test Semi Final', logs: [], isComplete: false };
+		const result = await testSemiFinal(scheduleData, addLog);
+		testModal.isComplete = true;
+		
 		toast.success(result.message);
 		await refreshSchedule();
+	}
+
+	function closeTestModal() {
+		testModal.isOpen = false;
 	}
 
 	function isMatchComplete(match) {
@@ -372,4 +393,5 @@
 		{/if}
 	</main>
 	<ScoreModal isOpen={scoreModal.isOpen} match={scoreModal.match} bind:score1={scoreModal.score1} bind:score2={scoreModal.score2} onClose={closeScoreModal} onSave={saveScore} />
+	<TestProcessModal isOpen={testModal.isOpen} title={testModal.title} logs={testModal.logs} isComplete={testModal.isComplete} onClose={closeTestModal} />
 </div>

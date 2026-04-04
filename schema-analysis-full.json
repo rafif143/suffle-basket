@@ -1,0 +1,336 @@
+{
+  "tables": [],
+  "columns": {
+    "users": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "default_value": "gen_random_uuid()",
+        "constraints": [
+          "PRIMARY KEY"
+        ]
+      },
+      {
+        "column_name": "username",
+        "data_type": "varchar(255)",
+        "is_nullable": "NO",
+        "default_value": "-",
+        "constraints": [
+          "UNIQUE"
+        ]
+      },
+      {
+        "column_name": "password_hash",
+        "data_type": "varchar(255)",
+        "is_nullable": "NO",
+        "default_value": "-",
+        "constraints": []
+      },
+      {
+        "column_name": "role",
+        "data_type": "varchar(255)",
+        "is_nullable": "NO",
+        "default_value": "-",
+        "constraints": []
+      },
+      {
+        "column_name": "full_name",
+        "data_type": "unknown",
+        "is_nullable": "YES",
+        "default_value": "-",
+        "constraints": []
+      },
+      {
+        "column_name": "email",
+        "data_type": "unknown",
+        "is_nullable": "YES",
+        "default_value": "-",
+        "constraints": []
+      },
+      {
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "default_value": "false",
+        "constraints": []
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "default_value": "now()",
+        "constraints": [
+          "DEFAULT now()"
+        ]
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "default_value": "now()",
+        "constraints": []
+      }
+    ],
+    "settings": [
+      {
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "default_value": "gen_random_uuid()",
+        "constraints": [
+          "PRIMARY KEY"
+        ]
+      },
+      {
+        "column_name": "bank_name",
+        "data_type": "varchar(255)",
+        "is_nullable": "NO",
+        "default_value": "-",
+        "constraints": []
+      },
+      {
+        "column_name": "account_number",
+        "data_type": "varchar(255)",
+        "is_nullable": "NO",
+        "default_value": "-",
+        "constraints": []
+      },
+      {
+        "column_name": "account_name",
+        "data_type": "varchar(255)",
+        "is_nullable": "NO",
+        "default_value": "-",
+        "constraints": []
+      },
+      {
+        "column_name": "registration_fee",
+        "data_type": "varchar(255)",
+        "is_nullable": "NO",
+        "default_value": "-",
+        "constraints": []
+      },
+      {
+        "column_name": "whatsapp_contact",
+        "data_type": "varchar(255)",
+        "is_nullable": "NO",
+        "default_value": "-",
+        "constraints": []
+      },
+      {
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "default_value": "now()",
+        "constraints": [
+          "DEFAULT now()"
+        ]
+      },
+      {
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "default_value": "now()",
+        "constraints": []
+      }
+    ]
+  },
+  "foreignKeys": [
+    {
+      "from_table": "draw_results",
+      "from_column": "category",
+      "to_table": "registrations",
+      "to_column": "category (derived from level+gender)",
+      "type": "Logical reference"
+    },
+    {
+      "from_table": "matches",
+      "from_column": "category",
+      "to_table": "registrations",
+      "to_column": "category (derived from level+gender)",
+      "type": "Logical reference"
+    },
+    {
+      "from_table": "matches",
+      "from_column": "team1, team2",
+      "to_table": "draw_results",
+      "to_column": "team1, team2",
+      "type": "Logical reference"
+    },
+    {
+      "from_table": "match_scores",
+      "from_column": "match_key",
+      "to_table": "matches",
+      "to_column": "id (via generated key)",
+      "type": "Logical reference"
+    }
+  ],
+  "indexes": [
+    {
+      "table": "registrations",
+      "index": "registrations_pkey",
+      "columns": [
+        "id"
+      ],
+      "type": "PRIMARY KEY"
+    },
+    {
+      "table": "registrations",
+      "index": "idx_registrations_school",
+      "columns": [
+        "school_name"
+      ],
+      "type": "UNIQUE"
+    },
+    {
+      "table": "registrations",
+      "index": "idx_registrations_status",
+      "columns": [
+        "status"
+      ],
+      "type": "BTREE"
+    },
+    {
+      "table": "registrations",
+      "index": "idx_registrations_category",
+      "columns": [
+        "level",
+        "gender"
+      ],
+      "type": "BTREE"
+    },
+    {
+      "table": "draw_results",
+      "index": "draw_results_pkey",
+      "columns": [
+        "id"
+      ],
+      "type": "PRIMARY KEY"
+    },
+    {
+      "table": "draw_results",
+      "index": "idx_draw_category",
+      "columns": [
+        "category"
+      ],
+      "type": "BTREE"
+    },
+    {
+      "table": "draw_results",
+      "index": "idx_draw_match_index",
+      "columns": [
+        "match_index"
+      ],
+      "type": "BTREE"
+    },
+    {
+      "table": "matches",
+      "index": "matches_pkey",
+      "columns": [
+        "id"
+      ],
+      "type": "PRIMARY KEY"
+    },
+    {
+      "table": "matches",
+      "index": "idx_matches_category",
+      "columns": [
+        "category"
+      ],
+      "type": "BTREE"
+    },
+    {
+      "table": "matches",
+      "index": "idx_matches_day",
+      "columns": [
+        "day"
+      ],
+      "type": "BTREE"
+    },
+    {
+      "table": "matches",
+      "index": "idx_matches_round",
+      "columns": [
+        "round"
+      ],
+      "type": "BTREE"
+    },
+    {
+      "table": "match_scores",
+      "index": "match_scores_pkey",
+      "columns": [
+        "id"
+      ],
+      "type": "PRIMARY KEY"
+    },
+    {
+      "table": "match_scores",
+      "index": "idx_match_key",
+      "columns": [
+        "match_key"
+      ],
+      "type": "UNIQUE"
+    },
+    {
+      "table": "users",
+      "index": "users_pkey",
+      "columns": [
+        "id"
+      ],
+      "type": "PRIMARY KEY"
+    },
+    {
+      "table": "users",
+      "index": "idx_users_username",
+      "columns": [
+        "username"
+      ],
+      "type": "UNIQUE"
+    },
+    {
+      "table": "settings",
+      "index": "settings_pkey",
+      "columns": [
+        "id"
+      ],
+      "type": "PRIMARY KEY"
+    }
+  ],
+  "triggers": [],
+  "functions": [],
+  "sampleData": {
+    "users": [
+      {
+        "id": "827647b7-08dc-48c4-ab70-8b195f513cea",
+        "username": "admin",
+        "password_hash": "$2b$10$f07AqmYsRddXewfIWnFvGeFoz5KhpGc8Apf07PGuBdWvgK00jovxK",
+        "role": "admin",
+        "full_name": null,
+        "email": null,
+        "is_active": true,
+        "created_at": "2026-03-23T11:59:32.756+00:00",
+        "updated_at": "2026-03-23T11:59:32.756+00:00"
+      }
+    ],
+    "settings": [
+      {
+        "id": "ae51a6b2-3b4f-45d5-9217-202430724b2f",
+        "bank_name": "Bank BCA",
+        "account_number": "1234567890",
+        "account_name": "Panitia Yadika Cup 2026",
+        "registration_fee": "2000000",
+        "whatsapp_contact": "+6281234567890",
+        "created_at": "2026-03-23T09:46:16.740812+00:00",
+        "updated_at": "2026-03-31T21:17:56.863+00:00"
+      }
+    ]
+  },
+  "tableCounts": {
+    "registrations": 0,
+    "draw_results": 0,
+    "matches": 0,
+    "match_scores": 0,
+    "users": 1,
+    "settings": 1
+  }
+}

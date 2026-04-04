@@ -37,14 +37,22 @@ export function generateMatchKey(match) {
  * @param {Array} matches - Array of match objects
  * @param {string} round - Round name (16 Besar, 8 Besar, etc.)
  * @param {Object} scores - Score configuration { home, away }
+ * @param {Function} onLog - Callback for progress logging
  * @returns {Object} Result { successCount, failCount }
  */
-export async function autoFillRoundScores(matches, round, scores) {
+export async function autoFillRoundScores(matches, round, scores, onLog = null) {
   const roundMatches = matches.filter((m) => m.round === round);
+  const log = (msg) => {
+    if (onLog) onLog(msg);
+    console.log(`[TestHelper] ${msg}`);
+  };
 
   if (roundMatches.length === 0) {
+    log(`No matches found for round: ${round}. Filtered ${matches.length} total matches.`);
     return { successCount: 0, failCount: 0, message: `No ${round} matches found` };
   }
+
+  log(`Found ${roundMatches.length} matches for ${round}. Starting automated scoring...`);
 
   let successCount = 0;
   let failCount = 0;
@@ -54,46 +62,56 @@ export async function autoFillRoundScores(matches, round, scores) {
     const s1 = match.match_number % 2 === 0 ? scores.home : scores.away;
     const s2 = match.match_number % 2 === 0 ? scores.away : scores.home;
 
+    const roundTag = round === ROUNDS.R16 ? 'R16' : round === ROUNDS.QF ? 'QF' : round === ROUNDS.SF ? 'SF' : 'FINAL';
+    log(`[${roundTag}] Scoring match ${scoreKey}: ${match.team1} vs ${match.team2} (${s1}-${s2})`);
+
     try {
       await scheduleService.saveScore(scoreKey, s1, s2);
       successCount++;
     } catch (err) {
       failCount++;
+      log(`❌ Failed to save score for ${scoreKey}: ${err.message}`);
       console.error(`Failed to save score for ${scoreKey}:`, err.message);
     }
+    
+    // Add small delay to make it feel like it is working
+    await new Promise(r => setTimeout(r, 100));
   }
+
+  const finalMsg = `Completed: ${successCount} matches scored successfully${failCount > 0 ? `, ${failCount} failed` : ''}.`;
+  log(`✅ ${finalMsg}`);
 
   return {
     successCount,
     failCount,
-    message: `Successfully saved ${successCount} scores${failCount > 0 ? ` (${failCount} failed)` : ''}`,
+    message: finalMsg,
   };
 }
 
 /**
  * Test helper for 16 Besar round
  */
-export async function test16Besar(matches) {
-  return autoFillRoundScores(matches, ROUNDS.R16, TEST_SCORES.R16);
+export async function test16Besar(matches, onLog = null) {
+  return autoFillRoundScores(matches, ROUNDS.R16, TEST_SCORES.R16, onLog);
 }
 
 /**
  * Test helper for 8 Besar (Quarter Final) round
  */
-export async function test8Besar(matches) {
-  return autoFillRoundScores(matches, ROUNDS.QF, TEST_SCORES.QF);
+export async function test8Besar(matches, onLog = null) {
+  return autoFillRoundScores(matches, ROUNDS.QF, TEST_SCORES.QF, onLog);
 }
 
 /**
  * Test helper for Semi Final round
  */
-export async function testSemiFinal(matches) {
-  return autoFillRoundScores(matches, ROUNDS.SF, TEST_SCORES.SF);
+export async function testSemiFinal(matches, onLog = null) {
+  return autoFillRoundScores(matches, ROUNDS.SF, TEST_SCORES.SF, onLog);
 }
 
 /**
  * Test helper for Final round
  */
-export async function testFinal(matches) {
-  return autoFillRoundScores(matches, ROUNDS.FINAL, TEST_SCORES.FINAL);
+export async function testFinal(matches, onLog = null) {
+  return autoFillRoundScores(matches, ROUNDS.FINAL, TEST_SCORES.FINAL, onLog);
 }

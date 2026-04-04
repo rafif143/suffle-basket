@@ -4,6 +4,7 @@
 	import { MatchCard } from '$lib/components/features';
 	import { TeamInput } from '$lib/components/features/DrawPage';
 	import { DrawControls, ShuffleModal, DevModeControls } from '$lib/components/features/DrawPage';
+import { TestProcessModal } from '$lib/components/features/SchedulePage';
 	import { auth } from '$lib/stores/auth.svelte.js';
 	import { drawService, scheduleService, pdfService } from '$lib/services';
 	import { getMatchDay, getMatchTime, getMatchIndexInDay } from '$lib/utils';
@@ -28,6 +29,7 @@
 	});
 
 	let devModal = $state({ isOpen: false, title: '', message: '', isProcessing: false });
+	let testModal = $state({ isOpen: false, title: '', logs: [], isComplete: false });
 
 	let currentMatchIndex = $derived(drawResults.findIndex(m => m.team1 === 'TBD' || m.team2 === 'TBD'));
 	let completedMatches = $derived(MATCHES_PER_CATEGORY - 1 - currentMatchIndex);
@@ -137,7 +139,7 @@
 			isOpen: true,
 			title: action === 'draw-all' ? 'Draw All Categories' : '⚠️ Delete All Draw Data',
 			message: action === 'draw-all' 
-				? 'This will automatically draw all 4 categories. Continue?'
+				? 'This will automatically draw all 4 categories with Smart Shuffling. Continue?'
 				: 'This will DELETE ALL data from draw_results, matches, and match_scores. This action cannot be undone. Continue?',
 			isProcessing: false,
 			onConfirm: async () => {
@@ -145,6 +147,16 @@
 				try {
 					const data = await drawService.devAction(action);
 					if (data.success) {
+						if (action === 'draw-all' && data.logs) {
+							// Open log modal
+							testModal = {
+								isOpen: true,
+								title: 'Smart Shuffling Progress',
+								logs: data.logs,
+								isComplete: true
+							};
+						}
+						
 						apiCache.clear();
 						drawResults = Array(MATCHES_PER_CATEGORY).fill({ team1: 'TBD', team2: 'TBD' });
 						teamsInput = [];
@@ -161,6 +173,10 @@
 			},
 			onCancel: () => (devModal.isOpen = false),
 		};
+	}
+
+	function closeTestModal() {
+		testModal.isOpen = false;
 	}
 
 	function closeShuffleModal() {
@@ -259,3 +275,11 @@
 />
 
 <DevModeControls isOpen={devModal.isOpen} isProcessing={devModal.isProcessing} title={devModal.title} message={devModal.message} onConfirm={devModal.onConfirm} onCancel={devModal.onCancel} />
+
+<TestProcessModal 
+	isOpen={testModal.isOpen} 
+	title={testModal.title} 
+	logs={testModal.logs} 
+	isComplete={testModal.isComplete} 
+	onClose={closeTestModal} 
+/>
