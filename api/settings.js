@@ -34,9 +34,25 @@ export default async function handler(req, res) {
             account_number: '123 456 7890',
             account_name: 'Panitia Championship',
             registration_fee: '350000',
+            registration_fees: {
+              sma_putra: '350000',
+              sma_putri: '350000',
+              smp_putra: '350000',
+              smp_putri: '350000'
+            },
             whatsapp_contact: ''
           }
         });
+      }
+
+      // Backward compatibility: construct registration_fees from registration_fee
+      if (!data.registration_fees && data.registration_fee) {
+        data.registration_fees = {
+          sma_putra: data.registration_fee,
+          sma_putri: data.registration_fee,
+          smp_putra: data.registration_fee,
+          smp_putri: data.registration_fee
+        };
       }
 
       return res.status(200).json({
@@ -46,16 +62,22 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { bankName, accountNumber, accountName, registrationFee, whatsappContact } = req.body;
+      const { bankName, accountNumber, accountName, registrationFees, whatsappContact } = req.body;
+
+      console.log('[Settings POST] req.body:', JSON.stringify(req.body));
+      console.log('[Settings POST] registrationFees:', JSON.stringify(registrationFees));
 
       const settingsData = {
         bank_name: bankName,
         account_number: accountNumber,
         account_name: accountName,
-        registration_fee: registrationFee,
+        registration_fees: registrationFees,
+        registration_fee: registrationFees?.sma_putra || '350000',
         whatsapp_contact: whatsappContact,
         updated_at: new Date().toISOString()
       };
+
+      console.log('[Settings POST] settingsData:', JSON.stringify(settingsData));
 
       // Check if settings exist
       const { data: existing } = await supabase

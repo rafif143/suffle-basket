@@ -6,7 +6,12 @@
 	let bankName = $state('');
 	let accountNumber = $state('');
 	let accountName = $state('');
-	let registrationFee = $state('');
+	let registrationFees = $state({
+		sma_putra: '',
+		sma_putri: '',
+		smp_putra: '',
+		smp_putri: ''
+	});
 	let whatsappNumber = $state('');
 
 	let saveModal = $state({
@@ -27,7 +32,13 @@
 				bankName = data.bank_name || 'Bank BCA';
 				accountNumber = data.account_number || '123 456 7890';
 				accountName = data.account_name || 'Panitia Championship';
-				registrationFee = data.registration_fee || '350000';
+				const fees = data.registration_fees || {};
+				registrationFees = {
+					sma_putra: fees.sma_putra || data.registration_fee || '350000',
+					sma_putri: fees.sma_putri || data.registration_fee || '350000',
+					smp_putra: fees.smp_putra || data.registration_fee || '350000',
+					smp_putri: fees.smp_putri || data.registration_fee || '350000'
+				};
 				whatsappNumber = data.whatsapp_contact || '81234567890';
 			}
 		} catch (error) {
@@ -42,7 +53,7 @@
 				bankName,
 				accountNumber,
 				accountName,
-				registrationFee,
+				registrationFees: $state.snapshot(registrationFees),
 				whatsappContact: whatsappNumber
 			});
 			saveModal.isOpen = true;
@@ -133,34 +144,43 @@
 						</div>
 					</div>
 
-					<!-- Section 2: Registration Fee -->
+					<!-- Section 2: Registration Fees -->
 					<div class="bg-white/95 backdrop-blur-sm rounded-2xl border border-neutral-200/50 p-6">
 						<div class="flex items-start gap-3.5 mb-5">
 							<div class="w-9 h-9 bg-linear-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center font-montserrat text-sm font-black text-white shadow-lg shadow-indigo-200 shrink-0">
 								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
 							</div>
 							<div>
-								<h2 class="font-montserrat text-base font-extrabold text-neutral-900">Registration Fee</h2>
-								<p class="text-xs text-neutral-400 mt-0.5">Set the registration fee amount per team</p>
+								<h2 class="font-montserrat text-base font-extrabold text-neutral-900">Registration Fees</h2>
+								<p class="text-xs text-neutral-400 mt-0.5">Set the registration fee per category</p>
 							</div>
 						</div>
 
-						<div class="space-y-1.5">
-							<label for="registration-fee" class="text-[11px] font-poppins font-bold text-neutral-600 uppercase tracking-wide">Fee Amount (IDR)</label>
-							<div class="relative">
-								<span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-neutral-600 pointer-events-none">Rp</span>
-								<input 
-									id="registration-fee" 
-									type="number" 
-									bind:value={registrationFee} 
-									required 
-									placeholder="350000" 
-									class="w-full pl-12 pr-3.5 py-2.5 bg-neutral-50 border-2 border-neutral-200 rounded-xl font-poppins text-sm font-medium text-neutral-900 placeholder:text-neutral-300 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:bg-white" 
-								/>
-							</div>
-							{#if registrationFee}
-								<p class="text-xs text-neutral-500 mt-1.5">Preview: <span class="font-semibold text-indigo-600">Rp {formatCurrency(registrationFee)}</span></p>
-							{/if}
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							{#each [
+								{ key: 'sma_putra', label: 'SMA Putra' },
+								{ key: 'sma_putri', label: 'SMA Putri' },
+								{ key: 'smp_putra', label: 'SMP Putra' },
+								{ key: 'smp_putri', label: 'SMP Putri' }
+							] as cat}
+								<div class="space-y-1.5">
+									<label for="fee-{cat.key}" class="text-[11px] font-poppins font-bold text-neutral-600 uppercase tracking-wide">{cat.label}</label>
+									<div class="relative">
+										<span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-neutral-600 pointer-events-none">Rp</span>
+										<input 
+											id="fee-{cat.key}" 
+											type="number" 
+											bind:value={registrationFees[cat.key]} 
+											required 
+											placeholder="350000" 
+											class="w-full pl-12 pr-3.5 py-2.5 bg-neutral-50 border-2 border-neutral-200 rounded-xl font-poppins text-sm font-medium text-neutral-900 placeholder:text-neutral-300 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:bg-white" 
+										/>
+									</div>
+									{#if registrationFees[cat.key]}
+										<p class="text-xs text-neutral-500">Rp <span class="font-semibold text-indigo-600">{formatCurrency(registrationFees[cat.key])}</span></p>
+									{/if}
+								</div>
+							{/each}
 						</div>
 					</div>
 				</div>
@@ -211,9 +231,19 @@
 						</div>
 
 						<div class="bg-white rounded-xl p-4 space-y-3">
-							<div class="flex items-center justify-between pb-3 border-b border-neutral-100">
-								<span class="text-xs font-poppins font-semibold text-neutral-500">Registration Fee</span>
-								<span class="font-montserrat text-lg font-black text-indigo-600">Rp {formatCurrency(registrationFee || '0')}</span>
+							<div class="pb-3 border-b border-neutral-100 space-y-2">
+								<span class="text-[11px] font-poppins font-bold text-neutral-600 uppercase tracking-wide">Registration Fees</span>
+								{#each [
+									{ key: 'sma_putra', label: 'SMA Putra' },
+									{ key: 'sma_putri', label: 'SMA Putri' },
+									{ key: 'smp_putra', label: 'SMP Putra' },
+									{ key: 'smp_putri', label: 'SMP Putri' }
+								] as cat}
+									<div class="flex items-center justify-between">
+										<span class="text-xs font-poppins font-medium text-neutral-400">{cat.label}</span>
+										<span class="font-montserrat text-sm font-black text-indigo-600">Rp {formatCurrency(registrationFees[cat.key] || '0')}</span>
+									</div>
+								{/each}
 							</div>
 							<div class="space-y-2">
 								<div class="flex items-center justify-between">

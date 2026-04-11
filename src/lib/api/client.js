@@ -95,6 +95,9 @@ export const apiClient = {
     if (endpoint.includes('/matches')) {
       apiCache.delete('GET:/matches');
     }
+    if (endpoint.includes('/settings')) {
+      apiCache.delete('GET:/settings');
+    }
   },
 
   async get(endpoint) {

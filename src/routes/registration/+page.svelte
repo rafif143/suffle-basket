@@ -27,7 +27,12 @@
 		bankName: 'Bank BCA',
 		accountNumber: '123 456 7890',
 		accountName: 'Panitia Championship',
-		registrationFee: '350000',
+		registrationFees: {
+			sma_putra: '350000',
+			sma_putri: '350000',
+			smp_putra: '350000',
+			smp_putri: '350000'
+		},
 		whatsappContact: ''
 	});
 
@@ -45,7 +50,12 @@
 					bankName: data.bank_name,
 					accountNumber: data.account_number,
 					accountName: data.account_name,
-					registrationFee: data.registration_fee,
+					registrationFees: data.registration_fees || {
+						sma_putra: data.registration_fee || '350000',
+						sma_putri: data.registration_fee || '350000',
+						smp_putra: data.registration_fee || '350000',
+						smp_putri: data.registration_fee || '350000'
+					},
 					whatsappContact: data.whatsapp_contact || ''
 				};
 			}
@@ -142,6 +152,7 @@
 
 	let filledPlayers = $derived(players.filter(p => p.name.trim()).length);
 	let cardsUploaded = $derived(players.filter(p => p.card).length);
+	let currentFee = $derived(settings.registrationFees[`${level.toLowerCase()}_${gender.toLowerCase()}`] || '0');
 
 	function closePaymentGuide() {
 		showPaymentGuide = false;
@@ -351,7 +362,7 @@
 				<div class="flex flex-col gap-0 bg-indigo-50 border-2 border-indigo-200 rounded-xl overflow-hidden sm:rounded-2xl">
 					<div class="bg-indigo-100 p-4 sm:p-5">
 						<p class="text-[11px] font-poppins font-bold text-indigo-600 uppercase tracking-wide mb-1">Biaya Pendaftaran</p>
-						<p class="font-montserrat text-xl font-black text-indigo-600 mb-0.5 sm:text-2xl">Rp {new Intl.NumberFormat('id-ID').format(settings.registrationFee)}</p>
+						<p class="font-montserrat text-xl font-black text-indigo-600 mb-0.5 sm:text-2xl">Rp {new Intl.NumberFormat('id-ID').format(currentFee)}</p>
 						<p class="text-[10px] text-neutral-500 sm:text-xs">per tim</p>
 					</div>
 					<div class="h-px bg-indigo-200"></div>
@@ -444,7 +455,7 @@
 					<div class="w-10 h-10 bg-linear-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center font-montserrat text-sm font-black text-white shadow-md shadow-indigo-200 flex-shrink-0">2</div>
 					<div class="pt-1.5">
 						<h3 class="font-poppins text-sm font-bold text-neutral-900">Transfer Biaya Pendaftaran</h3>
-						<p class="text-xs text-neutral-500 mt-0.5">Transfer ke rekening yang tertera di bagian bawah formulir sebesar <span class="font-bold text-indigo-600">Rp {new Intl.NumberFormat('id-ID').format(settings.registrationFee)}</span></p>
+						<p class="text-xs text-neutral-500 mt-0.5">Transfer ke rekening yang tertera di bagian bawah formulir sebesar <span class="font-bold text-indigo-600">Rp {new Intl.NumberFormat('id-ID').format(currentFee)}</span></p>
 					</div>
 				</div>
 

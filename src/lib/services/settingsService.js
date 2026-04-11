@@ -22,7 +22,7 @@ export const settingsService = {
 			bankName: settings.bankName,
 			accountNumber: settings.accountNumber,
 			accountName: settings.accountName,
-			registrationFee: settings.registrationFee,
+			registrationFees: settings.registrationFees,
 			whatsappContact: settings.whatsappContact
 		});
 		return response.data;
