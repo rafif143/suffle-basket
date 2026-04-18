@@ -49,8 +49,8 @@
             });
             matchScores = await scheduleService.getScores();
             
-            // Fetch logos for all teams
-            const registrations = await registrationService.getAll();
+            // Fetch logos for all teams (PUBLIC)
+            const registrations = await registrationService.getVerifiedTeams();
             teamLogosMap = Object.fromEntries(registrations.map(r => [r.school_name, r.logo_url]));
             
             lastUpdated = new Date();

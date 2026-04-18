@@ -14,15 +14,15 @@ import { requireAuth, isPublicEndpoint } from '../_lib/auth.js';
 export default async function handler(req, res) {
   if (cors(req, res)) return;
 
-  const { id, stats } = req.query;
+  const { id, stats, verified } = req.query;
 
   // Auth policy:
   // 1. GET all registrations -> PROTECTED
-  // 2. GET by ID / stats -> PUBLIC
+  // 2. GET by ID / stats / verified -> PUBLIC
   // 3. POST (create new) -> PUBLIC (for public registration page)
   // 4. PATCH/DELETE -> PROTECTED
   const isProtectedMethod = ['PATCH', 'DELETE'].includes(req.method);
-  const isProtectedListing = req.method === 'GET' && !id && !stats;
+  const isProtectedListing = req.method === 'GET' && !id && !stats && !verified;
   
   if (isProtectedMethod || isProtectedListing) {
     const user = await requireAuth(req, res);
@@ -31,6 +31,22 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
+      // Get verified teams for public use (logos)
+      if (verified === 'true') {
+        const { data, error } = await supabase
+          .from('registrations')
+          .select('school_name, logo_url, level, gender')
+          .eq('status', 'Verified')
+          .order('school_name', { ascending: true });
+
+        if (error) throw error;
+
+        return res.status(200).json({
+          success: true,
+          data
+        });
+      }
+
       // Get stats
       if (stats === 'true') {
         const { data, error } = await supabase

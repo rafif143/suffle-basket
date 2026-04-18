@@ -14,6 +14,14 @@ export const registrationService = {
 		const response = await apiClient.get('/registrations');
 		return response.data;
 	},
+	
+	/**
+	 * Get verified teams (PUBLIC)
+	 */
+	async getVerifiedTeams() {
+		const response = await apiClient.get('/registrations?verified=true');
+		return response.data;
+	},
 
 	/**
 	 * Get registration by ID
