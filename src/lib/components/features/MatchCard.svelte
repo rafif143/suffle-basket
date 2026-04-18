@@ -75,7 +75,7 @@
 				{#if score}
 					<div class="text-4xl font-montserrat font-black text-neutral-900 tabular-nums">{score.score1}</div>
 				{:else}
-					<div class="text-4xl font-montserrat font-black text-neutral-100 tabular-nums">0</div>
+					<div class="text-4xl font-montserrat font-black text-neutral-900 tabular-nums">0</div>
 				{/if}
 			</div>
 
@@ -105,7 +105,7 @@
 				{#if score}
 					<div class="text-4xl font-montserrat font-black text-neutral-900 tabular-nums">{score.score2}</div>
 				{:else}
-					<div class="text-4xl font-montserrat font-black text-neutral-100 tabular-nums">0</div>
+					<div class="text-4xl font-montserrat font-black text-neutral-900 tabular-nums">0</div>
 				{/if}
 			</div>
 		</div>
