@@ -50,8 +50,8 @@
 	}
 </script>
 
-{#if isPublicRoute && !auth.isAuthenticated}
-	<!-- Public user on public route (login, live-scores) - no sidebar -->
+{#if isPublicRoute}
+	<!-- Public routes (login, live-scores, registration) - always no sidebar -->
 	{@render children()}
 {:else if showLoading}
 	<!-- Loading state -->
@@ -61,8 +61,8 @@
 			<p class="text-neutral-600 font-poppins">Loading...</p>
 		</div>
 	</div>
-{:else if auth.isAuthenticated && $page.url.pathname !== '/login'}
-	<!-- Authenticated admin - show sidebar everywhere except login page -->
+{:else if auth.isAuthenticated}
+	<!-- Authenticated admin on protected routes - show sidebar -->
 	<div class="flex h-screen overflow-hidden bg-neutral-50">
 		<!-- Sidebar -->
 		<aside class="fixed left-0 top-0 h-full bg-[#1a1d2e] flex flex-col transition-all duration-300 ease-out z-50 overflow-hidden {isSidebarOpen ? 'w-60' : 'w-[72px]'}">

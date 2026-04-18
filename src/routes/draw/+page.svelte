@@ -25,6 +25,8 @@ import { TestProcessModal } from '$lib/components/features/SchedulePage';
 		isShuffling: false,
 		team1: '???',
 		team2: '???',
+		logo1: null,
+		logo2: null,
 		matchIndex: -1,
 	});
 
@@ -35,6 +37,7 @@ import { TestProcessModal } from '$lib/components/features/SchedulePage';
 	let completedMatches = $derived(MATCHES_PER_CATEGORY - 1 - currentMatchIndex);
 	let shuffleDay = $derived(getMatchDay(activeLevel, activeGender, shuffleModal.matchIndex));
 	let shuffleTime = $derived(getMatchTime(shuffleDay, getMatchIndexInDay(activeLevel, activeGender, shuffleModal.matchIndex)));
+	let teamLogosMap = $derived(Object.fromEntries(teamsInput.map(t => [t.name, t.logo])));
 	let category = $derived(`${activeLevel} ${activeGender}`);
 
 	onMount(() => {
@@ -72,6 +75,8 @@ import { TestProcessModal } from '$lib/components/features/SchedulePage';
 			isOpen: true,
 			team1: '???',
 			team2: '???',
+			logo1: null,
+			logo2: null,
 			message: `Ready to draw teams for Match ${nextIdx + 1}?`,
 			matchIndex: nextIdx,
 		};
@@ -80,8 +85,8 @@ import { TestProcessModal } from '$lib/components/features/SchedulePage';
 	function startActualShuffle() {
 		if (isShuffling) return;
 		
-		const drawnTeams = drawResults.flatMap(m => [m.team1, m.team2]).filter(t => t !== 'TBD' && t !== '?');
-		const remainingTeams = teamsInput.filter(t => !drawnTeams.includes(t));
+		const drawnNames = drawResults.flatMap(m => [m.team1, m.team2]).filter(t => t !== 'TBD' && t !== '?');
+		const remainingTeams = teamsInput.filter(t => !drawnNames.includes(t.name));
 		
 		if (remainingTeams.length < 2) {
 			alert('Not enough remaining teams to draw a complete match! Please ensure all teams are registered and verified.');
@@ -104,16 +109,20 @@ import { TestProcessModal } from '$lib/components/features/SchedulePage';
 				idx2 = Math.floor(Math.random() * remainingTeams.length);
 			}
 			
-			shuffleModal.team1 = remainingTeams[idx1];
-			shuffleModal.team2 = remainingTeams[idx2];
+			shuffleModal.team1 = remainingTeams[idx1].name;
+			shuffleModal.team2 = remainingTeams[idx2].name;
+			shuffleModal.logo1 = remainingTeams[idx1].logo;
+			shuffleModal.logo2 = remainingTeams[idx2].logo;
 			
 			if (counter >= SHUFFLE_DURATION) {
 				clearInterval(timer);
 				const shuffled = [...remainingTeams].sort(() => 0.5 - Math.random());
-				const team1 = shuffled[0];
-				const team2 = shuffled[1];
+				const team1 = shuffled[0].name;
+				const team2 = shuffled[1].name;
+				const logo1 = shuffled[0].logo;
+				const logo2 = shuffled[1].logo;
 				
-				shuffleModal = { ...shuffleModal, team1, team2, isShuffling: false };
+				shuffleModal = { ...shuffleModal, team1, team2, logo1, logo2, isShuffling: false };
 				
 				drawResults[shuffleModal.matchIndex] = { team1, team2 };
 				drawResults = [...drawResults];
@@ -252,7 +261,14 @@ import { TestProcessModal } from '$lib/components/features/SchedulePage';
 
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 					{#each drawResults as match, index}
-						<MatchCard {match} {index} level={activeLevel} gender={activeGender} />
+						<MatchCard 
+							{match} 
+							{index} 
+							level={activeLevel} 
+							gender={activeGender} 
+							logo1={teamLogosMap[match.team1]}
+							logo2={teamLogosMap[match.team2]}
+						/>
 					{/each}
 				</div>
 			</div>
@@ -265,6 +281,8 @@ import { TestProcessModal } from '$lib/components/features/SchedulePage';
 	isShuffling={shuffleModal.isShuffling}
 	team1={shuffleModal.team1}
 	team2={shuffleModal.team2}
+	logo1={shuffleModal.logo1}
+	logo2={shuffleModal.logo2}
 	category={category}
 	day={shuffleDay}
 	time={shuffleTime}

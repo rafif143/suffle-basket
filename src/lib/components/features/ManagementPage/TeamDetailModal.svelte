@@ -9,6 +9,8 @@
 	let deleteModal = $state({
 		isOpen: false
 	});
+
+	let previewImage = $state(null);
 </script>
 
 {#if team}
@@ -20,11 +22,29 @@
 			<!-- Header -->
 			<div class="bg-linear-to-r from-indigo-50 to-white px-6 py-5 border-b border-neutral-100 flex items-center justify-between flex-shrink-0">
 				<div class="flex items-center gap-3.5">
-					<div class="w-11 h-11 bg-linear-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
-						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-					</div>
+					<button 
+						onclick={() => previewImage = team.logo}
+						disabled={!team.logo}
+						class="w-12 h-12 bg-white border border-neutral-200 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100 overflow-hidden hover:scale-105 active:scale-95 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						{#if team.logo}
+							<img src={team.logo} alt="Logo" class="w-full h-full object-contain p-1" />
+						{:else}
+							<div class="w-full h-full bg-linear-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+								<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+							</div>
+						{/if}
+						<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/></svg>
+						</div>
+					</button>
 					<div>
-						<h3 class="font-montserrat text-xl font-black text-neutral-900">{team.school}</h3>
+						<div class="flex items-center gap-2">
+							<h3 class="font-montserrat text-xl font-black text-neutral-900">{team.school}</h3>
+							{#if team.logo}
+								<button onclick={() => previewImage = team.logo} class="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 underline decoration-2 underline-offset-2 transition-colors">Lihat Logo</button>
+							{/if}
+						</div>
 						<p class="text-xs text-neutral-500 font-medium mt-0.5">{team.id} · {team.level} {team.gender}</p>
 					</div>
 				</div>
@@ -71,7 +91,11 @@
 								<div class="flex items-center gap-2.5 px-3.5 py-3 border-b border-neutral-200 last:border-b-0 hover:bg-white transition-colors">
 									<span class="w-5 text-right font-montserrat text-xs font-extrabold text-neutral-300">{i + 1}</span>
 									<span class="flex-1 text-sm font-poppins font-semibold text-neutral-900">{player.name}</span>
-									<button class="flex items-center gap-1 bg-indigo-100 border border-indigo-200 text-indigo-600 font-poppins text-[11px] font-bold px-2.5 py-1 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors">
+									<button 
+										onclick={() => previewImage = player.card_url}
+										disabled={!player.card_url}
+										class="flex items-center gap-1 bg-indigo-100 border border-indigo-200 text-indigo-600 font-poppins text-[11px] font-bold px-2.5 py-1 rounded-lg hover:bg-indigo-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+									>
 										<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
 										View ID
 									</button>
@@ -146,6 +170,41 @@
 					>
 						Delete
 					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- ID Card Preview Modal -->
+	{#if previewImage}
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div 
+			class="fixed inset-0 z-[70] bg-neutral-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 lg:p-12 animate-in fade-in duration-300" 
+			onclick={() => previewImage = null}
+		>
+			<!-- Close Button (Absolute to viewport) -->
+			<button 
+				onclick={(e) => { e.stopPropagation(); previewImage = null; }}
+				class="absolute top-6 right-6 z-50 w-12 h-12 bg-white/10 hover:bg-white/20 hover:scale-110 active:scale-95 text-white rounded-full flex items-center justify-center transition-all border border-white/20 backdrop-blur-md shadow-2xl"
+				aria-label="Close preview"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+			</button>
+
+			<div class="relative max-w-5xl w-full h-full flex flex-col items-center justify-center" onclick={e => e.stopPropagation()}>
+				<div class="w-full h-full bg-neutral-900/50 rounded-3xl border border-white/10 overflow-hidden flex items-center justify-center shadow-2xl shadow-black/50">
+					<img src={previewImage} alt="ID Card Preview" class="max-w-full max-h-full object-contain animate-in zoom-in-95 duration-500 shadow-2xl" />
+				</div>
+				
+				<div class="mt-8 flex items-center gap-4">
+					<p class="font-montserrat text-sm font-black text-white/40 uppercase tracking-[.25em]">
+						Student Identification Document
+					</p>
+					<div class="h-px w-12 bg-white/20"></div>
+					<a href={previewImage} target="_blank" class="text-indigo-400 hover:text-indigo-300 font-poppins text-xs font-bold underline decoration-2 underline-offset-4 transition-colors">
+						Open Original
+					</a>
 				</div>
 			</div>
 		</div>

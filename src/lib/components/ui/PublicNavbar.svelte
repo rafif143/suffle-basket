@@ -1,5 +1,4 @@
 <script>
-	import { page } from '$app/stores';
 </script>
 
 <nav class="bg-black/20 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
@@ -18,20 +17,5 @@
 			</div>
 		</a>
 		
-		<div class="hidden lg:flex items-center gap-8 font-poppins text-xs font-bold uppercase tracking-wider text-white">
-			<a href="/live-scores" class="transition-colors {$page.url.pathname === '/live-scores' ? 'text-indigo-400' : 'text-white/60 hover:text-white'}">Live Scores</a>
-			<a href="/schedule" class="transition-colors {$page.url.pathname === '/schedule' ? 'text-indigo-400' : 'text-white/60 hover:text-white'}">Schedule</a>
-			<a href="/draw" class="transition-colors {$page.url.pathname === '/draw' ? 'text-indigo-400' : 'text-white/60 hover:text-white'}">Bracket</a>
-			<a href="/registration" class="transition-colors {$page.url.pathname === '/registration' ? 'text-indigo-400' : 'text-white/60 hover:text-white'}">Registration</a>
-			<div class="h-4 w-px bg-white/10"></div>
-			<a href="/login" class="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all">Admin Panel</a>
-		</div>
-
-		<!-- Mobile trigger placeholder if needed -->
-		<div class="lg:hidden">
-			<button class="p-2 text-white/60" aria-label="Open Menu">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-			</button>
-		</div>
 	</div>
 </nav>

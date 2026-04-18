@@ -4,6 +4,8 @@
 		isShuffling = false,
 		team1 = '???',
 		team2 = '???',
+		logo1 = null,
+		logo2 = null,
 		category = '',
 		day = 1,
 		time = '',
@@ -36,14 +38,45 @@
 			</h2>
 
 			<div class="flex w-full flex-col items-center justify-center gap-12 md:flex-row">
-				<div class="flex h-64 w-full items-center justify-center rounded-3xl border-2 p-6 md:w-5/12 {isShuffling ? 'border-neutral-800 bg-white/5' : 'border-indigo-500 bg-white/10 shadow-2xl shadow-indigo-500/20'}">
-					<h3 class="text-center font-poppins text-4xl font-bold {isShuffling ? 'text-neutral-700' : 'text-white'}">{team1}</h3>
+				<!-- Team 1 -->
+				<div class="flex flex-col items-center gap-6 w-full md:w-5/12">
+					<div class="relative group flex h-72 w-full items-center justify-center rounded-[3rem] border-2 transition-all duration-700 {isShuffling ? 'border-neutral-800 bg-neutral-900/50 grayscale' : 'border-indigo-500 bg-white/10 shadow-[0_0_50px_rgba(79,70,229,0.3)]'}">
+						{#if logo1}
+							<img src={logo1} alt="Logo" class="max-h-[60%] max-w-[60%] object-contain transition-transform duration-500 {isShuffling ? 'scale-90 animate-pulse' : 'scale-110'}" />
+						{:else}
+							<div class="text-8xl font-black text-neutral-800">?</div>
+						{/if}
+						
+						{#if !isShuffling && team1 !== '???'}
+							<div class="absolute -top-4 -right-4 bg-indigo-600 text-white rounded-full p-2 shadow-lg animate-bounce">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+							</div>
+						{/if}
+					</div>
+					<h3 class="font-montserrat text-4xl font-black uppercase tracking-tight {isShuffling ? 'text-neutral-700' : 'text-white'}">{team1}</h3>
 				</div>
 
-				<div class="z-10 font-montserrat text-6xl font-black {isShuffling ? 'text-neutral-800' : 'text-indigo-400'}">VS</div>
+				<!-- VS -->
+				<div class="relative">
+					<div class="font-montserrat text-7xl font-black italic tracking-tighter {isShuffling ? 'text-neutral-800' : 'text-transparent bg-clip-text bg-linear-to-b from-indigo-400 to-indigo-600'}">VS</div>
+				</div>
 
-				<div class="flex h-64 w-full items-center justify-center rounded-3xl border-2 p-6 md:w-5/12 {isShuffling ? 'border-neutral-800 bg-white/5' : 'border-indigo-500 bg-white/10 shadow-2xl shadow-indigo-500/20'}">
-					<h3 class="text-center font-poppins text-4xl font-bold {isShuffling ? 'text-neutral-700' : 'text-white'}">{team2}</h3>
+				<!-- Team 2 -->
+				<div class="flex flex-col items-center gap-6 w-full md:w-5/12">
+					<div class="relative group flex h-72 w-full items-center justify-center rounded-[3rem] border-2 transition-all duration-700 {isShuffling ? 'border-neutral-800 bg-neutral-900/50 grayscale' : 'border-indigo-500 bg-white/10 shadow-[0_0_50px_rgba(79,70,229,0.3)]'}">
+						{#if logo2}
+							<img src={logo2} alt="Logo" class="max-h-[60%] max-w-[60%] object-contain transition-transform duration-500 {isShuffling ? 'scale-90 animate-pulse' : 'scale-110'}" />
+						{:else}
+							<div class="text-8xl font-black text-neutral-800">?</div>
+						{/if}
+
+						{#if !isShuffling && team2 !== '???'}
+							<div class="absolute -top-4 -right-4 bg-indigo-600 text-white rounded-full p-2 shadow-lg animate-bounce" style="animation-delay: 0.2s">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+							</div>
+						{/if}
+					</div>
+					<h3 class="font-montserrat text-4xl font-black uppercase tracking-tight {isShuffling ? 'text-neutral-700' : 'text-white'}">{team2}</h3>
 				</div>
 			</div>
 

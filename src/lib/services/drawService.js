@@ -27,8 +27,11 @@ export const drawService = {
 					reg.gender === gender && 
 					reg.status === 'Verified'
 				)
-				.map(reg => reg.school_name)
-				.sort();
+				.map(reg => ({
+					name: reg.school_name,
+					logo: reg.logo_url
+				}))
+				.sort((a, b) => a.name.localeCompare(b.name));
 			
 			return verifiedTeams;
 		} catch (error) {

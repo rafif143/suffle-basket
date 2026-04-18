@@ -53,21 +53,30 @@
 			<span class="text-xs font-poppins font-medium {teams.length === 16 ? 'text-indigo-600' : 'text-neutral-400'}">{teams.length}/16 Teams</span>
 		</div>
 		{#each teams as team, i}
-			{@const isScheduled = drawResults.some(m => m.team1 === team || m.team2 === team)}
+			{@const teamName = typeof team === 'string' ? team : team.name}
+			{@const teamLogo = typeof team === 'string' ? null : team.logo}
+			{@const isScheduled = drawResults.some(m => m.team1 === teamName || m.team2 === teamName)}
 			<div class="flex items-center justify-between p-3 rounded-lg border {isScheduled ? 'border-indigo-100 bg-indigo-50/50' : 'border-neutral-100 bg-neutral-50'} hover:border-neutral-200 transition-colors">
 				<div class="flex items-center gap-3 overflow-hidden">
 					<span class="font-montserrat font-bold text-neutral-400 text-sm">{i + 1}</span>
-					<div class="flex flex-col">
-						<span class="font-poppins font-medium text-neutral-900 text-sm">{team}</span>
+					
+					{#if teamLogo}
+						<div class="w-8 h-8 rounded-lg overflow-hidden border border-neutral-200 bg-white shadow-xs shrink-0">
+							<img src={teamLogo} alt="{teamName} logo" class="w-full h-full object-contain" />
+						</div>
+					{/if}
+
+					<div class="flex flex-col overflow-hidden">
+						<span class="font-poppins font-medium text-neutral-900 text-sm truncate">{teamName}</span>
 						{#if isScheduled}
 							<span class="text-xs font-poppins text-indigo-600 flex items-center gap-1">
-								<span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+								<span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
 								Scheduled
 							</span>
 						{/if}
 					</div>
 				</div>
-				<button onclick={() => removeTeam(i)} class="text-neutral-300 hover:text-red-500 transition-colors" aria-label="Remove team">
+				<button onclick={() => removeTeam(i)} class="text-neutral-300 hover:text-red-500 transition-colors shrink-0" aria-label="Remove team">
 					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
 				</button>
 			</div>
