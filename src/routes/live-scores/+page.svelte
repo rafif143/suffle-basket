@@ -1,12 +1,13 @@
 <script>
     import { onMount } from 'svelte';
     import { scheduleService, registrationService } from '$lib/services';
-    import { MatchCard } from '$lib/components/features';
+    import { MatchCard, BracketVisualization } from '$lib/components/features';
     import { PublicNavbar } from '$lib/components/ui';
     import { apiCache } from '$lib/utils/cache.js';
     import { fade, fly, scale } from 'svelte/transition';
 
     let activeCategory = $state('ALL');
+    let viewMode = $state('list'); // 'list' or 'bracket'
     let matchScores = $state({});
     let scheduleData = $state([]);
     let loading = $state(true);
@@ -124,24 +125,45 @@
         </header>
 
         <nav class="sticky top-6 z-50 mb-16">
-            <div class="bg-[#0c0c10]/80 backdrop-blur-2xl border border-white/10 p-1.5 rounded-2xl flex flex-wrap shadow-2xl overflow-x-auto no-scrollbar">
-                {#each [
-                    { id: 'ALL', label: 'All Matchups' },
-                    { id: 'SMA_PUTRA', label: 'SMA Putra' },
-                    { id: 'SMA_PUTRI', label: 'SMA Putri' },
-                    { id: 'SMP_PUTRA', label: 'SMP Putra' },
-                    { id: 'SMP_PUTRI', label: 'SMP Putri' }
-                ] as cat}
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1 bg-[#0c0c10]/80 backdrop-blur-2xl border border-white/10 p-1.5 rounded-2xl flex flex-wrap shadow-2xl overflow-x-auto no-scrollbar">
+                    {#each [
+                        { id: 'ALL', label: 'All Matchups' },
+                        { id: 'SMA_PUTRA', label: 'SMA Putra' },
+                        { id: 'SMA_PUTRI', label: 'SMA Putri' },
+                        { id: 'SMP_PUTRA', label: 'SMP Putra' },
+                        { id: 'SMP_PUTRI', label: 'SMP Putri' }
+                    ] as cat}
+                        <button
+                            onclick={() => activeCategory = cat.id}
+                            class="flex-1 min-w-[140px] py-3 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-500 
+                            {activeCategory === cat.id 
+                                ? 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.4)] scale-[1.02]' 
+                                : 'text-slate-500 hover:text-white hover:bg-white/5'}"
+                        >
+                            {cat.label}
+                        </button>
+                    {/each}
+                </div>
+
+                <div class="bg-[#0c0c10]/80 backdrop-blur-2xl border border-white/10 p-1.5 rounded-2xl flex shadow-2xl">
                     <button
-                        onclick={() => activeCategory = cat.id}
-                        class="flex-1 min-w-[140px] py-3 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-500 
-                        {activeCategory === cat.id 
-                            ? 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.4)] scale-[1.02]' 
-                            : 'text-slate-500 hover:text-white hover:bg-white/5'}"
+                        onclick={() => viewMode = 'list'}
+                        class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2
+                        {viewMode === 'list' ? 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)]' : 'text-slate-500 hover:text-white'}"
                     >
-                        {cat.label}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        List
                     </button>
-                {/each}
+                    <button
+                        onclick={() => viewMode = 'bracket'}
+                        class="px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2
+                        {viewMode === 'bracket' ? 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)]' : 'text-slate-500 hover:text-white'}"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"></path><path d="M12 14v8"></path><path d="M18 6h-6"></path><path d="M18 18h-6"></path><path d="M6 6h6"></path><path d="M6 18h6"></path></svg>
+                        Bracket
+                    </button>
+                </div>
             </div>
         </nav>
 
@@ -158,46 +180,66 @@
             </div>
         {:else}
             <div class="space-y-32">
-                {#if groupedSchedule.length === 0}
-                    <div class="py-32 text-center bg-white/[0.02] border border-white/5 rounded-[3rem] backdrop-blur-sm" in:scale>
-                        <div class="text-6xl mb-6 opacity-20">⚽</div>
-                        <h3 class="text-3xl font-black uppercase tracking-tighter">No Matches Scheduled</h3>
-                        <p class="text-slate-500 mt-2">Adjust your filters to see other brackets.</p>
-                        <button onclick={() => activeCategory = 'ALL'} class="mt-8 text-indigo-400 font-bold underline decoration-2 underline-offset-8">Return to Overview</button>
-                    </div>
-                {:else}
-                    {#each groupedSchedule as dayGroup (dayGroup.day)}
-                        <section class="group" in:fly={{ y: 50, duration: 800 }}>
-                            <div class="flex items-center gap-8 mb-12">
-                                <div class="flex flex-col">
-                                    <span class="text-indigo-500 font-black tracking-[0.4em] text-[10px] uppercase ml-1">Timeline</span>
-                                    <h2 class="text-5xl font-black italic tracking-tighter uppercase">Day {dayGroup.day}</h2>
-                                </div>
-                                <div class="h-[2px] flex-1 bg-gradient-to-r from-white/20 via-white/5 to-transparent"></div>
-                                <div class="hidden md:block text-right">
-                                    <span class="text-slate-500 text-sm font-mono uppercase tracking-widest">{dayGroup.matches.length} Matches Found</span>
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
-                                {#each dayGroup.matches as match (match.id || match.matchStrId)}
-                                    <div class="hover:scale-[1.02] transition-transform duration-500">
-                                        <MatchCard
-                                            {match}
-                                            index={match.match_number - 1}
-                                            level={match.level}
-                                            gender={match.gender}
-                                            isComplete={isMatchComplete(match)}
-                                            score={getMatchScore(match)}
-                                            onInputScore={null}
-                                            logo1={teamLogosMap[match.team1]}
-                                            logo2={teamLogosMap[match.team2]}
-                                        />
+                {#if viewMode === 'list'}
+                    {#if groupedSchedule.length === 0}
+                        <div class="py-32 text-center bg-white/[0.02] border border-white/5 rounded-[3rem] backdrop-blur-sm" in:scale>
+                            <div class="text-6xl mb-6 opacity-20">⚽</div>
+                            <h3 class="text-3xl font-black uppercase tracking-tighter">No Matches Scheduled</h3>
+                            <p class="text-slate-500 mt-2">Adjust your filters to see other brackets.</p>
+                            <button onclick={() => activeCategory = 'ALL'} class="mt-8 text-indigo-400 font-bold underline decoration-2 underline-offset-8">Return to Overview</button>
+                        </div>
+                    {:else}
+                        {#each groupedSchedule as dayGroup (dayGroup.day)}
+                            <section class="group" in:fly={{ y: 50, duration: 800 }}>
+                                <div class="flex items-center gap-8 mb-12">
+                                    <div class="flex flex-col">
+                                        <span class="text-indigo-500 font-black tracking-[0.4em] text-[10px] uppercase ml-1">Timeline</span>
+                                        <h2 class="text-5xl font-black italic tracking-tighter uppercase">Day {dayGroup.day}</h2>
                                     </div>
-                                {/each}
+                                    <div class="h-[2px] flex-1 bg-gradient-to-r from-white/20 via-white/5 to-transparent"></div>
+                                    <div class="hidden md:block text-right">
+                                        <span class="text-slate-500 text-sm font-mono uppercase tracking-widest">{dayGroup.matches.length} Matches Found</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+                                    {#each dayGroup.matches as match (match.id || match.matchStrId)}
+                                        <div class="hover:scale-[1.02] transition-transform duration-500">
+                                            <MatchCard
+                                                {match}
+                                                index={match.match_number - 1}
+                                                level={match.level}
+                                                gender={match.gender}
+                                                isComplete={isMatchComplete(match)}
+                                                score={getMatchScore(match)}
+                                                onInputScore={null}
+                                                logo1={teamLogosMap[match.team1]}
+                                                logo2={teamLogosMap[match.team2]}
+                                            />
+                                        </div>
+                                    {/each}
+                                </div>
+                            </section>
+                        {/each}
+                    {/if}
+                {:else}
+                    <div in:fade>
+                        {#if activeCategory === 'ALL'}
+                            <div class="py-32 text-center bg-white/[0.02] border border-white/5 rounded-[3rem] backdrop-blur-sm">
+                                <div class="text-6xl mb-6 opacity-20">📊</div>
+                                <h3 class="text-3xl font-black uppercase tracking-tighter">Select a Category</h3>
+                                <p class="text-slate-500 mt-2">Bracket view requires a specific category to be selected for clarity.</p>
+                                <div class="flex flex-wrap justify-center gap-4 mt-8 px-4">
+                                    <button onclick={() => activeCategory = 'SMA_PUTRA'} class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 transition-colors rounded-xl text-xs font-bold uppercase tracking-widest">SMA Putra</button>
+                                    <button onclick={() => activeCategory = 'SMA_PUTRI'} class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 transition-colors rounded-xl text-xs font-bold uppercase tracking-widest">SMA Putri</button>
+                                    <button onclick={() => activeCategory = 'SMP_PUTRA'} class="px-6 py-2 bg-purple-600 hover:bg-purple-500 transition-colors rounded-xl text-xs font-bold uppercase tracking-widest">SMP Putra</button>
+                                    <button onclick={() => activeCategory = 'SMP_PUTRI'} class="px-6 py-2 bg-purple-600 hover:bg-purple-500 transition-colors rounded-xl text-xs font-bold uppercase tracking-widest">SMP Putri</button>
+                                </div>
                             </div>
-                        </section>
-                    {/each}
+                        {:else}
+                            <BracketVisualization matches={filteredSchedule} scores={matchScores} logos={teamLogosMap} />
+                        {/if}
+                    </div>
                 {/if}
             </div>
         {/if}

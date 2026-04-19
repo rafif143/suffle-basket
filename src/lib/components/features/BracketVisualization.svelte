@@ -1,148 +1,132 @@
 <script>
-	let { matches = [], level = 'SMA', gender = 'Putra', scores = {} } = $props();
+    let { matches = [], scores = {}, logos = {} } = $props();
 
-	// Group matches by rounds from actual data
-	let rounds = $derived.by(() => {
-		const roundOf16 = matches.filter(m => m.round === '16 Besar');
-		const quarterFinals = matches.filter(m => m.round === '8 Besar');
-		const semiFinals = matches.filter(m => m.round === 'Semi Final');
-		const finals = matches.filter(m => m.round === 'Final');
+    // Consistency check for match keys
+    function generateMatchKey(match) {
+        if (match.match_key) return match.match_key;
+        const match_number = match.match_number || match.matchStrId?.replace(/[A-Z]/g, '');
+        let prefix = match.matchStrId?.startsWith('M') ? `M${String(match_number).padStart(2, '0')}` : match.matchStrId;
+        return `${match.day}-${prefix}-${match.category.toLowerCase().replace(' ', '-')}`;
+    }
 
-		return {
-			roundOf16,
-			quarterFinals,
-			semiFinals,
-			finals
-		};
-	});
+    // Group matches by rounds with better detection
+    let rounds = $derived.by(() => {
+        const roundNames = ['16 Besar', '8 Besar', 'Semi Final', 'Final'];
+        const grouped = {
+            '16 Besar': matches.filter(m => m.round === '16 Besar').sort((a, b) => a.match_number - b.match_number),
+            '8 Besar': matches.filter(m => m.round === '8 Besar').sort((a, b) => a.match_number - b.match_number),
+            'Semi Final': matches.filter(m => m.round === 'Semi Final').sort((a, b) => a.match_number - b.match_number),
+            'Final': matches.filter(m => m.round === 'Final').sort((a, b) => a.match_number - b.match_number)
+        };
+        
+        // Only return rounds that have matches
+        return Object.entries(grouped)
+            .filter(([_, matches]) => matches.length > 0)
+            .map(([name, matches]) => ({ name, matches }));
+    });
+
+    const getMatchScore = (match) => scores[generateMatchKey(match)] || null;
+    const isMatchComplete = (match) => {
+        const s = getMatchScore(match);
+        return s && s.score1 !== undefined && s.score2 !== undefined;
+    };
+
+    const getRoundLabel = (name) => {
+        switch(name) {
+            case '16 Besar': return 'Round of 16';
+            case '8 Besar': return 'Quarter Finals';
+            case 'Semi Final': return 'Semi Finals';
+            case 'Final': return 'Grand Final';
+            default: return name;
+        }
+    };
 </script>
 
-<div class="bg-white/95 backdrop-blur-sm rounded-2xl border border-neutral-200/50 p-6">
-	<div class="flex items-center gap-3 mb-6">
-		<div class="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
-			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-			</svg>
-		</div>
-		<div>
-			<h3 class="font-montserrat text-lg font-extrabold text-neutral-900">Tournament Bracket</h3>
-			<p class="text-xs text-neutral-500">{level} {gender} - Single Elimination</p>
-		</div>
-	</div>
+<div class="relative w-full overflow-x-auto pb-12 no-scrollbar">
+    <div class="flex gap-4 md:gap-12 min-w-max px-4">
+        {#each rounds as round, roundIdx}
+            <div class="flex flex-col gap-8 w-64 md:w-80">
+                <div class="sticky top-0 z-10 py-4 bg-[#050507]/80 backdrop-blur-md mb-4 border-b border-white/10">
+                    <h4 class="text-xs font-black text-indigo-400 uppercase tracking-[0.3em]">{getRoundLabel(round.name)}</h4>
+                    <p class="text-[10px] text-slate-500 font-mono mt-1">{round.matches.length} Matches</p>
+                </div>
 
-	<div class="overflow-x-auto">
-		<div class="min-w-[800px] flex gap-8">
-			<!-- Round of 16 -->
-			<div class="flex-1">
-				<h4 class="text-xs font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide mb-3 text-center">Round of 16</h4>
-				<div class="space-y-3">
-					{#each rounds.roundOf16 as match}
-						{@const score = scores[match.match_key]}
-						{@const isComplete = score && score.score1 !== undefined && score.score2 !== undefined}
-						<div class="bg-neutral-50 border-2 {isComplete ? 'border-green-200' : 'border-neutral-200'} rounded-lg p-3">
-							<div class="text-[10px] font-poppins font-bold text-neutral-500 mb-1">{match.matchStrId}</div>
-							<div class="space-y-1">
-								<div class="flex items-center justify-between">
-									<span class="text-sm font-poppins font-semibold text-neutral-900 truncate">{match.team1 || 'TBD'}</span>
-									{#if isComplete}
-										<span class="text-sm font-montserrat font-black text-indigo-600">{score.score1}</span>
-									{/if}
-								</div>
-								<div class="flex items-center justify-between">
-									<span class="text-sm font-poppins font-semibold text-neutral-900 truncate">{match.team2 || 'TBD'}</span>
-									{#if isComplete}
-										<span class="text-sm font-montserrat font-black text-indigo-600">{score.score2}</span>
-									{/if}
-								</div>
-							</div>
-						</div>
-					{/each}
-				</div>
-			</div>
+                <div class="flex flex-col justify-around h-full gap-6">
+                    {#each round.matches as match (match.id || match.matchStrId)}
+                        {@const score = getMatchScore(match)}
+                        {@const complete = isMatchComplete(match)}
+                        
+                        <div class="relative group">
+                            <!-- Match Box -->
+                            <div class="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm transition-all duration-300 group-hover:border-indigo-500/50 group-hover:bg-white/10">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-[10px] font-mono text-slate-500 font-bold tracking-tighter">#{match.matchStrId}</span>
+                                    {#if complete}
+                                        <span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded-full">Finished</span>
+                                    {/if}
+                                </div>
+                                
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between gap-4">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <div class="w-6 h-6 rounded-full bg-white/10 overflow-hidden flex-shrink-0 border border-white/5">
+                                                {#if logos[match.team1]}
+                                                    <img src={logos[match.team1]} alt="" class="w-full h-full object-cover" />
+                                                {:else}
+                                                    <div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-white/20">?</div>
+                                                {/if}
+                                            </div>
+                                            <span class="text-sm font-bold truncate {complete && score.score1 > score.score2 ? 'text-white' : 'text-slate-400'}">
+                                                {match.team1 || 'TBD'}
+                                            </span>
+                                        </div>
+                                        {#if complete}
+                                            <span class="text-lg font-black font-mono {score.score1 > score.score2 ? 'text-indigo-400' : 'text-slate-600'}">
+                                                {score.score1}
+                                            </span>
+                                        {/if}
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between gap-4">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <div class="w-6 h-6 rounded-full bg-white/10 overflow-hidden flex-shrink-0 border border-white/5">
+                                                {#if logos[match.team2]}
+                                                    <img src={logos[match.team2]} alt="" class="w-full h-full object-cover" />
+                                                {:else}
+                                                    <div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-white/20">?</div>
+                                                {/if}
+                                            </div>
+                                            <span class="text-sm font-bold truncate {complete && score.score2 > score.score1 ? 'text-white' : 'text-slate-400'}">
+                                                {match.team2 || 'TBD'}
+                                            </span>
+                                        </div>
+                                        {#if complete}
+                                            <span class="text-lg font-black font-mono {score.score2 > score.score1 ? 'text-indigo-400' : 'text-slate-600'}">
+                                                {score.score2}
+                                            </span>
+                                        {/if}
+                                    </div>
+                                </div>
+                            </div>
 
-			<!-- Quarter Finals -->
-			<div class="flex-1">
-				<h4 class="text-xs font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide mb-3 text-center">Quarter Finals</h4>
-				<div class="space-y-6 pt-8">
-					{#each rounds.quarterFinals as match}
-						{@const score = scores[match.match_key]}
-						{@const isComplete = score && score.score1 !== undefined && score.score2 !== undefined}
-						<div class="bg-neutral-50 border-2 {isComplete ? 'border-green-200' : 'border-neutral-200'} rounded-lg p-3">
-							<div class="text-[10px] font-poppins font-bold text-neutral-500 mb-1">{match.matchStrId}</div>
-							<div class="space-y-1">
-								<div class="flex items-center justify-between">
-									<span class="text-sm font-poppins font-semibold text-neutral-700 truncate">{match.team1 || 'TBD'}</span>
-									{#if isComplete}
-										<span class="text-sm font-montserrat font-black text-indigo-600">{score.score1}</span>
-									{/if}
-								</div>
-								<div class="flex items-center justify-between">
-									<span class="text-sm font-poppins font-semibold text-neutral-700 truncate">{match.team2 || 'TBD'}</span>
-									{#if isComplete}
-										<span class="text-sm font-montserrat font-black text-indigo-600">{score.score2}</span>
-									{/if}
-								</div>
-							</div>
-						</div>
-					{/each}
-				</div>
-			</div>
-
-			<!-- Semi Finals -->
-			<div class="flex-1">
-				<h4 class="text-xs font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide mb-3 text-center">Semi Finals</h4>
-				<div class="space-y-12 pt-16">
-					{#each rounds.semiFinals as match}
-						{@const score = scores[match.match_key]}
-						{@const isComplete = score && score.score1 !== undefined && score.score2 !== undefined}
-						<div class="bg-neutral-50 border-2 {isComplete ? 'border-green-200' : 'border-neutral-200'} rounded-lg p-3">
-							<div class="text-[10px] font-poppins font-bold text-neutral-500 mb-1">{match.matchStrId}</div>
-							<div class="space-y-1">
-								<div class="flex items-center justify-between">
-									<span class="text-sm font-poppins font-semibold text-neutral-700 truncate">{match.team1 || 'TBD'}</span>
-									{#if isComplete}
-										<span class="text-sm font-montserrat font-black text-indigo-600">{score.score1}</span>
-									{/if}
-								</div>
-								<div class="flex items-center justify-between">
-									<span class="text-sm font-poppins font-semibold text-neutral-700 truncate">{match.team2 || 'TBD'}</span>
-									{#if isComplete}
-										<span class="text-sm font-montserrat font-black text-indigo-600">{score.score2}</span>
-									{/if}
-								</div>
-							</div>
-						</div>
-					{/each}
-				</div>
-			</div>
-
-			<!-- Finals -->
-			<div class="flex-1">
-				<h4 class="text-xs font-montserrat font-extrabold text-neutral-600 uppercase tracking-wide mb-3 text-center">Grand Final</h4>
-				<div class="pt-24">
-					{#each rounds.finals as match}
-						{@const score = scores[match.match_key]}
-						{@const isComplete = score && score.score1 !== undefined && score.score2 !== undefined}
-						<div class="bg-gradient-to-br from-amber-50 to-yellow-50 border-2 {isComplete ? 'border-amber-300' : 'border-amber-200'} rounded-lg p-4">
-							<div class="text-[10px] font-poppins font-bold text-amber-700 mb-2 text-center">FINAL</div>
-							<div class="space-y-2">
-								<div class="flex items-center justify-between">
-									<span class="text-sm font-poppins font-bold text-neutral-900 truncate">{match.team1 || 'TBD'}</span>
-									{#if isComplete}
-										<span class="text-lg font-montserrat font-black text-amber-600">{score.score1}</span>
-									{/if}
-								</div>
-								<div class="flex items-center justify-between">
-									<span class="text-sm font-poppins font-bold text-neutral-900 truncate">{match.team2 || 'TBD'}</span>
-									{#if isComplete}
-										<span class="text-lg font-montserrat font-black text-amber-600">{score.score2}</span>
-									{/if}
-								</div>
-							</div>
-						</div>
-					{/each}
-				</div>
-			</div>
-		</div>
-	</div>
+                            <!-- Connector Lines (Visual Only for now) -->
+                            {#if roundIdx < rounds.length - 1}
+                                <div class="absolute -right-6 md:-right-12 top-1/2 w-6 md:w-12 h-[2px] bg-gradient-to-r from-white/10 to-transparent"></div>
+                            {/if}
+                        </div>
+                    {/each}
+                </div>
+            </div>
+        {/each}
+    </div>
 </div>
+
+<style>
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
