@@ -6,6 +6,11 @@
 
 	let registrations = $state([]);
 	let loading = $state(true);
+	let seeding = $state(false);
+	let deletingAll = $state(false);
+	let verifyingAll = $state(false);
+	let seedLogs = $state([]);
+	let showSeedModal = $state(false);
 
 	let searchQuery = $state('');
 	let filterLevel = $state('All');
@@ -20,6 +25,7 @@
 		try {
 			loading = true;
 			const data = await registrationService.getAll();
+			console.log('Loaded registrations:', data);
 			// Transform API data to match component format
 			registrations = data.map(r => ({
 				id: r.id,
@@ -32,12 +38,106 @@
 				whatsapp: r.whatsapp,
 				players: r.players,
 				officials: r.officials,
+				payment_proofs: r['payment-proofs'] || r.payment_proofs,
 				timestamp: r.created_at
 			}));
 		} catch (error) {
 			console.error('Failed to load registrations:', error);
 		} finally {
 			loading = false;
+		}
+	}
+
+	async function seedTestData() {
+		if (!confirm('This will generate 64 test teams (16 for each category). Continue?')) return;
+		
+		seeding = true;
+		showSeedModal = true;
+		seedLogs = [{ msg: 'Starting seed process...', type: 'info' }];
+		
+		try {
+			const categories = [
+				{ level: 'SMA', gender: 'Putra' },
+				{ level: 'SMA', gender: 'Putri' },
+				{ level: 'SMP', gender: 'Putra' },
+				{ level: 'SMP', gender: 'Putri' }
+			];
+
+			let count = 0;
+			for (const cat of categories) {
+				seedLogs.push({ msg: `Category: ${cat.level} ${cat.gender}`, type: 'info' });
+				for (let i = 1; i <= 16; i++) {
+					const schoolName = `${cat.level} ${cat.gender} ${i} - ${Math.random().toString(36).substring(7).toUpperCase()}`;
+					const dummyData = {
+						schoolName,
+						schoolAddress: `Jl. Pendidikan No. ${i}, Jakarta`,
+						whatsapp: '812' + Math.floor(10000000 + Math.random() * 90000000),
+						level: cat.level,
+						gender: cat.gender,
+						players: Array.from({ length: 5 }, (_, j) => ({
+							name: `Player ${j + 1} (${cat.level} ${cat.gender} ${i})`,
+							card: null
+						})),
+						officials: [`Coach ${cat.level} ${i}`, `Manager ${cat.level} ${i}`],
+						logoFile: null,
+						paymentProofFile: null,
+						status: 'Verified'
+					};
+					
+					console.log(`Seeding ${schoolName} with status:`, dummyData.status);
+					await registrationService.save(dummyData);
+					count++;
+					seedLogs.push({ msg: `[${count}/64] Created: ${schoolName}`, type: 'success' });
+				}
+			}
+			
+			seedLogs.push({ msg: `Successfully seeded ${count} test teams!`, type: 'info' });
+			await loadData();
+		} catch (error) {
+			console.error('Failed to seed data:', error);
+			seedLogs.push({ msg: `Error: ${error.message}`, type: 'error' });
+		} finally {
+			seeding = false;
+		}
+	}
+
+	async function verifyAllPending() {
+		const pendingCount = registrations.filter(r => r.status === 'Pending').length;
+		if (pendingCount === 0) {
+			alert('No pending teams to verify.');
+			return;
+		}
+
+		if (!confirm(`This will verify ALL ${pendingCount} pending registrations. Continue?`)) return;
+
+		verifyingAll = true;
+		try {
+			const result = await registrationService.bulkUpdateStatus('Verified');
+			alert(`✅ Successfully verified ${result.count} teams!`);
+			await loadData();
+		} catch (error) {
+			console.error('Failed to bulk verify:', error);
+			alert('❌ Failed to bulk verify: ' + error.message);
+		} finally {
+			verifyingAll = false;
+		}
+	}
+
+	async function deleteAllRegistrations() {
+		if (!confirm('CRITICAL: This will delete ALL registrations permanently. Are you absolutely sure?')) return;
+		if (!confirm('FINAL CONFIRMATION: Are you REALLY sure? This cannot be undone.')) return;
+
+		deletingAll = true;
+		try {
+			// Based on updated API, DELETE /api/registrations without ID deletes all
+			await registrationService.delete(null);
+			alert('✅ All registrations have been deleted.');
+			await loadData();
+		} catch (error) {
+			console.error('Failed to delete all registrations:', error);
+			alert('❌ Failed to delete all registrations: ' + error.message);
+		} finally {
+			deletingAll = false;
 		}
 	}
 
@@ -131,7 +231,30 @@
 				<h1 class="font-montserrat text-2xl font-extrabold text-neutral-900">Management Console</h1>
 				<p class="text-xs text-neutral-400 mt-1">Review and verify team registrations</p>
 			</div>
-			<span class="bg-indigo-100 text-indigo-700 border border-indigo-200 font-poppins text-[11px] font-bold px-3 py-1.5 rounded-full">Admin Mode</span>
+			<div class="flex items-center gap-3">
+				<button 
+					onclick={verifyAllPending}
+					disabled={verifyingAll || seeding || deletingAll}
+					class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-poppins text-[11px] font-bold px-4 py-1.5 rounded-full transition-colors disabled:opacity-50"
+				>
+					{verifyingAll ? 'Verifying...' : 'Verify All Pending'}
+				</button>
+				<button 
+					onclick={deleteAllRegistrations}
+					disabled={deletingAll || seeding}
+					class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-poppins text-[11px] font-bold px-4 py-1.5 rounded-full transition-colors disabled:opacity-50"
+				>
+					{deletingAll ? 'Deleting...' : 'Delete All'}
+				</button>
+				<button 
+					onclick={seedTestData}
+					disabled={seeding || deletingAll}
+					class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 font-poppins text-[11px] font-bold px-4 py-1.5 rounded-full transition-colors disabled:opacity-50"
+				>
+					{seeding ? 'Seeding...' : 'Seed Test Data'}
+				</button>
+				<span class="bg-indigo-100 text-indigo-700 border border-indigo-200 font-poppins text-[11px] font-bold px-3 py-1.5 rounded-full">Admin Mode</span>
+			</div>
 		</div>
 	</header>
 
@@ -334,3 +457,55 @@
 	onUpdateStatus={updateStatus}
 	onDelete={deleteTeam}
 />
+
+<!-- Seeding Log Modal -->
+{#if showSeedModal}
+	<div class="fixed inset-0 z-50 bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-5">
+		<div class="bg-white rounded-3xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
+			<!-- Header -->
+			<div class="bg-amber-50 px-6 py-5 border-b border-amber-100 flex items-center justify-between">
+				<div class="flex items-center gap-3">
+					<div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+					</div>
+					<div>
+						<h3 class="font-montserrat text-lg font-black text-neutral-900">Seeding Progress</h3>
+						<p class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">System Logs</p>
+					</div>
+				</div>
+				{#if !seeding}
+					<button 
+						onclick={() => showSeedModal = false}
+						class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-poppins font-bold text-xs rounded-xl transition-all"
+					>
+						Close
+					</button>
+				{/if}
+			</div>
+
+			<!-- Logs -->
+			<div class="flex-1 overflow-y-auto p-4 bg-neutral-900 font-mono text-[11px] leading-relaxed">
+				{#each seedLogs as log}
+					<div class="mb-1.5 flex gap-2">
+						<span class="text-neutral-500">[{new Date().toLocaleTimeString()}]</span>
+						{#if log.type === 'info'}
+							<span class="text-blue-400">INFO:</span>
+						{:else if log.type === 'success'}
+							<span class="text-emerald-400">SUCCESS:</span>
+						{:else}
+							<span class="text-rose-400">ERROR:</span>
+						{/if}
+						<span class="text-neutral-200">{log.msg}</span>
+					</div>
+				{/each}
+				
+				{#if seeding}
+					<div class="mt-4 flex items-center gap-2 text-amber-400 italic animate-pulse">
+						<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+						Processing next team...
+					</div>
+				{/if}
+			</div>
+		</div>
+	</div>
+{/if}

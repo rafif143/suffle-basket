@@ -10,6 +10,7 @@
 	let level = $state('SMA');
 	let gender = $state('Putra');
 	let schoolLogo = $state(null);
+	let paymentProof = $state(null);
 
 	let players = $state([
 		{ name: '', card: null },
@@ -104,8 +105,32 @@
 		schoolLogo = null;
 	}
 
+	function handlePaymentProofChange(e) {
+		const file = e.target.files[0];
+		if (file) {
+			if (file.size > 2 * 1024 * 1024) {
+				errorModal.message = `Payment proof file ${file.name} exceeds 2MB limit. Please upload a smaller file.`;
+				errorModal.isOpen = true;
+				return;
+			}
+			paymentProof = file;
+		}
+	}
+
+	function removePaymentProof() {
+		paymentProof = null;
+	}
+
 	async function handleSubmit(e) {
 		e.preventDefault();
+		
+		if (!paymentProof) {
+			errorModal.title = 'Missing Document';
+			errorModal.message = 'Please upload your payment proof before submitting.';
+			errorModal.isOpen = true;
+			return;
+		}
+
 		submissionStatus = 'submitting';
 		
 		try {
@@ -117,30 +142,29 @@
 				gender,
 				players: players.map(p => ({ name: p.name, card: p.card })),
 				officials,
-				logoFile: schoolLogo
+				logoFile: schoolLogo,
+				paymentProofFile: paymentProof
 			};
 
 			await registrationService.save(registrationData);
 			submissionStatus = 'success';
 			
-			// Reset form after 2 seconds
-			setTimeout(() => {
-				schoolName = '';
-				schoolAddress = '';
-				whatsapp = '';
-				level = 'SMA';
-				gender = 'Putra';
-				schoolLogo = null;
-				players = [
-					{ name: '', card: null },
-					{ name: '', card: null },
-					{ name: '', card: null },
-					{ name: '', card: null },
-					{ name: '', card: null }
-				];
-				officials = ['', ''];
-				submissionStatus = null;
-			}, 2000);
+			// Reset form data but keep the success modal open
+			schoolName = '';
+			schoolAddress = '';
+			whatsapp = '';
+			level = 'SMA';
+			gender = 'Putra';
+			schoolLogo = null;
+			paymentProof = null;
+			players = [
+				{ name: '', card: null },
+				{ name: '', card: null },
+				{ name: '', card: null },
+				{ name: '', card: null },
+				{ name: '', card: null }
+			];
+			officials = ['', ''];
 		} catch (error) {
 			console.error('Registration failed:', error);
 			submissionStatus = 'error';
@@ -355,22 +379,69 @@
 					<div class="w-9 h-9 bg-linear-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center font-montserrat text-sm font-black text-white shadow-lg shadow-indigo-200 shrink-0">03</div>
 					<div>
 						<h2 class="font-montserrat text-sm font-extrabold text-neutral-900 sm:text-base">Dokumen & Pembayaran</h2>
-						<p class="text-[10px] text-neutral-400 mt-0.5 sm:text-xs">Kartu pelajar di-upload per pemain di atas. Selesaikan pembayaran sebelum submit.</p>
+						<p class="text-[10px] text-neutral-400 mt-0.5 sm:text-xs">Kartu pelajar di-upload per pemain di atas. Selesaikan pembayaran dan upload bukti transfer.</p>
 					</div>
 				</div>
 
-				<div class="flex flex-col gap-0 bg-indigo-50 border-2 border-indigo-200 rounded-xl overflow-hidden sm:rounded-2xl">
-					<div class="bg-indigo-100 p-4 sm:p-5">
-						<p class="text-[11px] font-poppins font-bold text-indigo-600 uppercase tracking-wide mb-1">Biaya Pendaftaran</p>
-						<p class="font-montserrat text-xl font-black text-indigo-600 mb-0.5 sm:text-2xl">Rp {new Intl.NumberFormat('id-ID').format(currentFee)}</p>
-						<p class="text-[10px] text-neutral-500 sm:text-xs">per tim</p>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+					<div class="flex flex-col gap-0 bg-indigo-50 border-2 border-indigo-200 rounded-xl overflow-hidden sm:rounded-2xl">
+						<div class="bg-indigo-100 p-4 sm:p-5">
+							<p class="text-[11px] font-poppins font-bold text-indigo-600 uppercase tracking-wide mb-1">Biaya Pendaftaran</p>
+							<p class="font-montserrat text-xl font-black text-indigo-600 mb-0.5 sm:text-2xl">Rp {new Intl.NumberFormat('id-ID').format(currentFee)}</p>
+							<p class="text-[10px] text-neutral-500 sm:text-xs">per tim</p>
+						</div>
+						<div class="h-px bg-indigo-200"></div>
+						<div class="bg-white p-4 sm:p-5">
+							<p class="text-[11px] font-poppins font-bold text-indigo-600 uppercase tracking-wide mb-1">Transfer ke</p>
+							<p class="font-montserrat text-sm font-extrabold text-neutral-900 mb-0.5 sm:text-base sm:mb-1">{settings.bankName}</p>
+							<p class="font-montserrat text-lg font-black text-indigo-600 tracking-wide mb-0.5 sm:text-xl sm:mb-1">{settings.accountNumber}</p>
+							<p class="text-[11px] text-neutral-500 font-semibold">A/N {settings.accountName}</p>
+						</div>
 					</div>
-					<div class="h-px bg-indigo-200"></div>
-					<div class="bg-white p-4 sm:p-5">
-						<p class="text-[11px] font-poppins font-bold text-indigo-600 uppercase tracking-wide mb-1">Transfer ke</p>
-						<p class="font-montserrat text-sm font-extrabold text-neutral-900 mb-0.5 sm:text-base sm:mb-1">{settings.bankName}</p>
-						<p class="font-montserrat text-lg font-black text-indigo-600 tracking-wide mb-0.5 sm:text-xl sm:mb-1">{settings.accountNumber}</p>
-						<p class="text-[11px] text-neutral-500 font-semibold">A/N {settings.accountName}</p>
+
+					<div class="space-y-1.5">
+						<label for="payment-proof" class="text-[11px] font-poppins font-bold text-neutral-600 uppercase tracking-wide">Bukti Pembayaran</label>
+						<div class="flex flex-col gap-3">
+							{#if paymentProof}
+								<div class="relative group w-full">
+									<div class="w-full h-32 rounded-xl border-2 border-indigo-200 bg-indigo-50 flex items-center justify-center overflow-hidden">
+										<img src={URL.createObjectURL(paymentProof)} alt="Payment proof preview" class="w-full h-full object-cover" />
+									</div>
+									<button
+										type="button"
+										onclick={removePaymentProof}
+										class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow-md z-10"
+										aria-label="Remove payment proof"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+									</button>
+									<div class="mt-2">
+										<p class="text-xs font-poppins font-semibold text-neutral-700 truncate">{paymentProof.name}</p>
+										<p class="text-[10px] text-neutral-400 mt-0.5">{(paymentProof.size / 1024).toFixed(1)} KB</p>
+									</div>
+								</div>
+							{:else}
+								<label for="payment-proof" class="w-full cursor-pointer">
+									<div class="border-2 border-dashed border-neutral-300 rounded-xl p-6 hover:border-indigo-400 hover:bg-indigo-50 transition-all flex flex-col items-center justify-center gap-3 text-center min-h-[160px]">
+										<div class="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center">
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+										</div>
+										<div>
+											<p class="text-sm font-poppins font-semibold text-neutral-700">Upload Bukti Transfer</p>
+											<p class="text-xs text-neutral-400 mt-1">PNG, JPG, JPEG (Max 2MB)</p>
+										</div>
+									</div>
+									<input
+										id="payment-proof"
+										type="file"
+										accept="image/png,image/jpeg,image/jpg"
+										onchange={handlePaymentProofChange}
+										class="hidden"
+										required
+									/>
+								</label>
+							{/if}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -391,14 +462,22 @@
 
 <!-- Success Overlay -->
 {#if submissionStatus === 'success'}
-	<div class="fixed inset-0 z-50 bg-neutral-50/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-400">
-		<div class="bg-white rounded-3xl border border-neutral-200 p-8 max-w-md w-full text-center shadow-2xl sm:p-11">
+	<div class="fixed inset-0 z-[100] bg-neutral-900/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+		<div class="bg-white rounded-3xl border border-neutral-200 p-8 max-w-md w-full text-center shadow-2xl sm:p-11 transform animate-in zoom-in-95 duration-300">
 			<div class="w-16 h-16 bg-linear-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-xl shadow-indigo-300 sm:w-20 sm:h-20 sm:mb-6">
 				<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
 			</div>
-			<h3 class="font-montserrat text-2xl font-black text-neutral-900 mb-2 sm:text-3xl sm:mb-3">Pendaftaran Terkirim!</h3>
-			<p class="text-sm text-neutral-600 leading-relaxed mb-6 sm:mb-8">Terima kasih telah mendaftar. Panitia akan memverifikasi dokumen kamu dalam 1x24 jam. Pastikan WhatsApp kamu aktif.</p>
-			<a href="/" class="block py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-poppins font-bold rounded-xl transition-colors shadow-lg shadow-indigo-200">Kembali ke Beranda</a>
+			<h3 class="font-montserrat text-2xl font-black text-neutral-900 mb-2 sm:text-3xl sm:mb-3">Pendaftaran Berhasil!</h3>
+			<p class="text-sm text-neutral-600 leading-relaxed mb-8">Data tim kamu sudah kami terima. Panitia akan memverifikasi dokumen dan bukti pembayaran dalam 1x24 jam. Kami akan menghubungi lewat WhatsApp jika ada kendala.</p>
+			
+			<div class="flex flex-col gap-3">
+				<button 
+					onclick={() => submissionStatus = null}
+					class="block py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-poppins font-bold rounded-xl transition-all shadow-lg shadow-indigo-200 active:scale-95"
+				>
+					Tutup
+				</button>
+			</div>
 		</div>
 	</div>
 {/if}

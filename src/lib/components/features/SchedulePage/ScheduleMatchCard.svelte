@@ -34,7 +34,6 @@
 	<!-- Header -->
 	<div class="bg-linear-to-r from-indigo-50 to-white px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
 		<div class="flex items-center gap-2">
-			<span class="font-montserrat font-bold text-sm text-indigo-600">{match.round === 'Final' ? 'FINAL' : `M${String(match.match_number).padStart(2, '0')}`}</span>
 			<span class="text-[10px] font-poppins font-medium text-neutral-400">{match.round}</span>
 		</div>
 		<div class="flex items-center gap-1.5">
@@ -51,12 +50,6 @@
 				</span>
 			{/if}
 		</div>
-	</div>
-	
-	<!-- Time -->
-	<div class="px-4 py-2 border-b border-neutral-100 flex items-center gap-1.5 text-xs text-neutral-600">
-		<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-		{match.match_time} WIB
 	</div>
 	
 	<!-- Teams -->

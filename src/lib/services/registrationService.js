@@ -46,6 +46,17 @@ export const registrationService = {
 			}
 		}
 
+		// Process and compress payment proof
+		let paymentProofFile = null;
+		if (registration.paymentProofFile) {
+			try {
+				imageOptimizer.validateImage(registration.paymentProofFile);
+				paymentProofFile = await imageOptimizer.fileToBase64Compressed(registration.paymentProofFile, 800, 0.8);
+			} catch (error) {
+				throw new Error(`Payment proof upload failed: ${error.message}`);
+			}
+		}
+
 		// Process and compress player cards
 		const processedPlayers = [];
 		for (const player of registration.players) {
@@ -72,7 +83,9 @@ export const registrationService = {
 			gender: registration.gender,
 			players: processedPlayers,
 			officials: registration.officials,
-			logoFile
+			logoFile,
+			paymentProofFile,
+			status: registration.status
 		});
 		return response.data;
 	},
@@ -86,10 +99,19 @@ export const registrationService = {
 	},
 
 	/**
+	 * Bulk update status (specifically for Pending -> Verified)
+	 */
+	async bulkUpdateStatus(status) {
+		const response = await apiClient.patch('/registrations?bulk=true', { status });
+		return response.data;
+	},
+
+	/**
 	 * Delete registration
 	 */
 	async delete(id) {
-		await apiClient.delete(`/registrations?id=${id}`);
+		const url = id ? `/registrations?id=${id}` : '/registrations';
+		await apiClient.delete(url);
 	},
 
 	/**

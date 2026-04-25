@@ -81,6 +81,27 @@
 								{/each}
 							</div>
 						</div>
+
+						<div>
+							<h4 class="font-montserrat text-[11px] font-extrabold text-neutral-400 uppercase tracking-wide mb-3">Payment Proof</h4>
+							{#if team.payment_proofs}
+								<button 
+									onclick={() => previewImage = team.payment_proofs}
+									class="w-full aspect-video bg-neutral-100 border-2 border-dashed border-neutral-200 rounded-2xl overflow-hidden group relative transition-all hover:border-indigo-300"
+								>
+									<img src={team.payment_proofs} alt="Payment Proof" class="w-full h-full object-cover" />
+									<div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mb-2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/></svg>
+										<span class="text-white font-poppins font-bold text-xs uppercase tracking-wider">Preview Bukti</span>
+									</div>
+								</button>
+							{:else}
+								<div class="w-full py-8 bg-neutral-50 border-2 border-dashed border-neutral-200 rounded-2xl flex flex-col items-center justify-center gap-2 text-neutral-400">
+									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4-4 4 4"/></svg>
+									<p class="text-[11px] font-poppins font-bold uppercase tracking-wider">Belum ada bukti bayar</p>
+								</div>
+							{/if}
+						</div>
 					</div>
 
 					<!-- Right Column -->

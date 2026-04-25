@@ -48,8 +48,6 @@ export const pdfService = {
 				const scoreText = score ? `${score.score1} - ${score.score2}` : '-';
 				
 				return [
-					match.matchStrId,
-					match.time,
 					match.category,
 					match.team1,
 					'VS',
@@ -60,7 +58,7 @@ export const pdfService = {
 
 			autoTable(doc, {
 				startY: startY,
-				head: [['Match', 'Time', 'Category', 'Team 1', '', 'Team 2', 'Score']],
+				head: [['Category', 'Team 1', '', 'Team 2', 'Score']],
 				body: tableData,
 				theme: 'striped',
 				headStyles: { 
@@ -75,13 +73,11 @@ export const pdfService = {
 					cellPadding: 2
 				},
 				columnStyles: {
-					0: { cellWidth: 20, halign: 'center' },
-					1: { cellWidth: 25, halign: 'center' },
-					2: { cellWidth: 30, halign: 'center' },
+					0: { cellWidth: 30, halign: 'center' },
+					1: { cellWidth: 'auto', fontStyle: 'bold' },
+					2: { cellWidth: 15, halign: 'center', textColor: [150, 150, 150] },
 					3: { cellWidth: 'auto', fontStyle: 'bold' },
-					4: { cellWidth: 15, halign: 'center', textColor: [150, 150, 150] },
-					5: { cellWidth: 'auto', fontStyle: 'bold' },
-					6: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }
+					4: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }
 				},
 				margin: { left: 20, right: 20 }
 			});
@@ -125,7 +121,6 @@ export const pdfService = {
 			const scoreText = score ? `${score.score1} - ${score.score2}` : 'TBD';
 			
 			return [
-				`M${i + 1}`,
 				match.team1 || 'TBD',
 				'VS',
 				match.team2 || 'TBD',
@@ -135,17 +130,16 @@ export const pdfService = {
 
 		autoTable(doc, {
 			startY: startY,
-			head: [['Match', 'Team 1', '', 'Team 2', 'Score']],
+			head: [['Team 1', '', 'Team 2', 'Score']],
 			body: roundOf16Data,
 			theme: 'striped',
 			headStyles: { fillColor: [79, 70, 229], textColor: 255 },
 			styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
 			columnStyles: {
-				0: { cellWidth: 20, halign: 'center' },
-				1: { cellWidth: 'auto', fontStyle: 'bold' },
-				2: { cellWidth: 15, halign: 'center', textColor: [150, 150, 150] },
-				3: { cellWidth: 'auto', fontStyle: 'bold' },
-				4: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }
+				0: { cellWidth: 'auto', fontStyle: 'bold' },
+				1: { cellWidth: 15, halign: 'center', textColor: [150, 150, 150] },
+				2: { cellWidth: 'auto', fontStyle: 'bold' },
+				3: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }
 			}
 		});
 
@@ -172,7 +166,6 @@ export const pdfService = {
 				const scoreText = score ? `${score.score1} - ${score.score2}` : 'TBD';
 				
 				roundData.push([
-					`${round.name === 'Grand Final' ? 'FINAL' : round.name.substring(0, 2) + (i + 1)}`,
 					'Winner from previous round',
 					'VS',
 					'Winner from previous round',
@@ -182,17 +175,16 @@ export const pdfService = {
 
 			autoTable(doc, {
 				startY: startY,
-				head: [['Match', 'Team 1', '', 'Team 2', 'Score']],
+				head: [['Team 1', '', 'Team 2', 'Score']],
 				body: roundData,
 				theme: 'striped',
 				headStyles: { fillColor: [79, 70, 229], textColor: 255 },
 				styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
 				columnStyles: {
-					0: { cellWidth: 20, halign: 'center' },
-					1: { cellWidth: 'auto', fontStyle: 'bold' },
-					2: { cellWidth: 15, halign: 'center', textColor: [150, 150, 150] },
-					3: { cellWidth: 'auto', fontStyle: 'bold' },
-					4: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }
+					0: { cellWidth: 'auto', fontStyle: 'bold' },
+					1: { cellWidth: 15, halign: 'center', textColor: [150, 150, 150] },
+					2: { cellWidth: 'auto', fontStyle: 'bold' },
+					3: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }
 				}
 			});
 

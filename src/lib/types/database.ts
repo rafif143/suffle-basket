@@ -149,6 +149,7 @@ export type Database = {
           level: string
           logo_url: string | null
           officials: Json
+          payment_proofs: string | null
           players: Json
           school_address: string
           school_name: string
@@ -163,6 +164,7 @@ export type Database = {
           level: string
           logo_url?: string | null
           officials: Json
+          payment_proofs?: string | null
           players: Json
           school_address: string
           school_name: string
@@ -177,6 +179,7 @@ export type Database = {
           level?: string
           logo_url?: string | null
           officials?: Json
+          payment_proofs?: string | null
           players?: Json
           school_address?: string
           school_name?: string

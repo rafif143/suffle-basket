@@ -59,8 +59,7 @@
                         <div class="relative group">
                             <!-- Match Box -->
                             <div class="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm transition-all duration-300 group-hover:border-indigo-500/50 group-hover:bg-white/10">
-                                <div class="flex items-center justify-between mb-3">
-                                    <span class="text-[10px] font-mono text-slate-500 font-bold tracking-tighter">#{match.matchStrId}</span>
+                                <div class="flex items-center justify-end mb-3">
                                     {#if complete}
                                         <span class="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-widest rounded-full">Finished</span>
                                     {/if}

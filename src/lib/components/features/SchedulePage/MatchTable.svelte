@@ -12,8 +12,6 @@
 		<table class="w-full">
 			<thead class="bg-linear-to-r from-indigo-50 to-white border-b border-neutral-200">
 				<tr>
-					<th class="px-4 py-3 text-left text-xs font-montserrat font-bold text-neutral-700 uppercase">Match</th>
-					<th class="px-4 py-3 text-left text-xs font-montserrat font-bold text-neutral-700 uppercase">Time</th>
 					<th class="px-4 py-3 text-left text-xs font-montserrat font-bold text-neutral-700 uppercase">Category</th>
 					<th class="px-4 py-3 text-left text-xs font-montserrat font-bold text-neutral-700 uppercase">Home Team</th>
 					<th class="px-4 py-3 text-center text-xs font-montserrat font-bold text-neutral-700 uppercase">Score</th>
@@ -29,12 +27,6 @@
 					{@const matchComplete = isMatchComplete(match)}
 					{@const matchScore = getMatchScore(match)}
 					<tr class="hover:bg-neutral-50/50 transition-colors {matchComplete ? 'bg-green-50/30' : ''}">
-						<td class="px-4 py-4">
-							<span class="font-montserrat font-bold text-sm text-indigo-600">{match.round === 'Final' ? `Final ${match.category}` : `M${String(match.match_number).padStart(2, '0')}`}</span>
-						</td>
-						<td class="px-4 py-4">
-							<span class="text-sm font-poppins text-neutral-700">{match.match_time}</span>
-						</td>
 						<td class="px-4 py-4">
 							<span class="text-xs font-poppins font-semibold px-2 py-1 rounded {match.category.includes('SMA') ? 'bg-blue-600 text-white' : 'bg-orange-500 text-white'}">{match.category}</span>
 						</td>

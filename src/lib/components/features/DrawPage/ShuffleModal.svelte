@@ -24,7 +24,6 @@
 			<div class="mb-8 flex flex-wrap items-center justify-center gap-4">
 				<span class="rounded-full border border-neutral-700 bg-neutral-900 px-8 py-3 text-lg font-poppins font-semibold text-white">{category}</span>
 				<span class="rounded-full border border-indigo-500 bg-indigo-600 px-10 py-3 text-xl font-poppins font-bold text-white shadow-xl shadow-indigo-500/30">DAY {day}</span>
-				<span class="rounded-full border border-blue-500 bg-blue-600 px-10 py-3 text-xl font-poppins font-bold text-white shadow-xl shadow-blue-500/30">{time} WIB</span>
 			</div>
 
 			<h2 class="mb-12 font-montserrat text-3xl font-bold {isShuffling ? 'animate-pulse text-indigo-400' : 'text-white'}">
