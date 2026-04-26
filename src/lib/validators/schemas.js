@@ -61,7 +61,8 @@ export const teamRegistrationSchema = z.object({
     .max(255, 'Address must be less than 255 characters'),
   whatsapp: z
     .string()
-    .regex(/^\+?[0-9]{10,15}$/, 'Invalid WhatsApp number. Use format: 6281234567890'),
+    .min(5, 'WhatsApp number is too short')
+    .max(20, 'WhatsApp number is too long'),
   level: z
     .enum(['SMA', 'SMP'], {
       errorMap: () => ({ message: 'Level must be either SMA or SMP' })
@@ -76,6 +77,10 @@ export const teamRegistrationSchema = z.object({
         .string()
         .min(3, 'Player name must be at least 3 characters')
         .max(100, 'Player name must be less than 100 characters'),
+      cardFile: z
+        .string()
+        .optional()
+        .nullable(),
       card_url: z
         .string()
         .url('Invalid card URL')
@@ -83,10 +88,13 @@ export const teamRegistrationSchema = z.object({
         .nullable()
     }))
     .min(5, 'Minimum 5 players required')
-    .max(12, 'Maximum 12 players allowed'),
+    .max(15, 'Maximum 15 players allowed'),
   officials: z
     .array(z.string())
-    .min(2, 'Minimum 2 officials required')
+    .min(2, 'Minimum 2 officials required'),
+  logoFile: z.string().optional().nullable(),
+  paymentProofFile: z.string().optional().nullable(),
+  status: z.string().optional()
 });
 
 /**

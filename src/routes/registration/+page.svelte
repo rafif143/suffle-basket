@@ -66,7 +66,7 @@
 	});
 
 	function addPlayer() {
-		if (players.length < 12) players = [...players, { name: '', card: null }];
+		if (players.length < 15) players = [...players, { name: '', card: null }];
 	}
 
 	function removePlayer(index) {
@@ -324,11 +324,11 @@
 					<div class="w-9 h-9 bg-linear-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center font-montserrat text-sm font-black text-white shadow-lg shadow-indigo-200 flex-shrink-0">02</div>
 					<div class="flex-1">
 						<h2 class="font-montserrat text-sm font-extrabold text-neutral-900 sm:text-base">Pemain & Official</h2>
-						<p class="text-[10px] text-neutral-400 mt-0.5 sm:text-xs">Min 5 · Max 12 pemain. Upload kartu pelajar (max 2MB).</p>
+						<p class="text-[10px] text-neutral-400 mt-0.5 sm:text-xs">Min 5 · Max 15 pemain. Upload kartu pelajar (max 2MB).</p>
 					</div>
 					<div class="flex items-baseline gap-0.5">
 						<span class="font-montserrat text-2xl font-black text-indigo-600">{players.length}</span>
-						<span class="text-sm font-semibold text-neutral-400">/12</span>
+						<span class="text-sm font-semibold text-neutral-400">/15</span>
 					</div>
 				</div>
 
@@ -351,7 +351,7 @@
 						/>
 					{/each}
 
-					{#if players.length < 12}
+					{#if players.length < 15}
 						<button type="button" onclick={addPlayer} class="w-full py-2.5 border-2 border-dashed border-neutral-300 rounded-xl bg-transparent font-poppins text-sm font-semibold text-neutral-400 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 transition-all flex items-center justify-center gap-2">
 							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
 							Tambah Pemain

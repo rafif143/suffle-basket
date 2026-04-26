@@ -1,6 +1,7 @@
 import { supabase } from '../_lib/supabase.js';
 import { cors } from '../_lib/cors.js';
 import { requireAuth, isPublicEndpoint } from '../_lib/auth.js';
+import { teamRegistrationSchema, validateData } from '../../src/lib/validators/schemas.js';
 
 /**
  * Helper to extract storage path from Supabase public URL
@@ -106,7 +107,20 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { schoolName, schoolAddress, whatsapp, level, gender, players, officials, logoFile, paymentProofFile, status } = req.body;
+      // 1. Validate request body
+      const validation = teamRegistrationSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error',
+          errors: validation.error.errors.map(err => ({
+            field: err.path.join('.'),
+            message: err.message
+          }))
+        });
+      }
+
+      const { schoolName, schoolAddress, whatsapp, level, gender, players, officials, logoFile, paymentProofFile, status } = validation.data;
 
       let logoUrl = null;
       let paymentProofUrl = null;
